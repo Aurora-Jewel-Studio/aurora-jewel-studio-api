@@ -78,7 +78,7 @@ router.get("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const result = await query("SELECT * FROM orders WHERE id = $1", [
-      parseInt(id),
+      parseInt(id as string),
     ]);
 
     if (result.rowCount === 0) {
@@ -105,24 +105,24 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
     if (order_status) {
       await query("UPDATE orders SET order_status = $1 WHERE id = $2", [
         order_status,
-        parseInt(id),
+        parseInt(id as string),
       ]);
     }
     if (payment_status) {
       await query("UPDATE orders SET payment_status = $1 WHERE id = $2", [
         payment_status,
-        parseInt(id),
+        parseInt(id as string),
       ]);
     }
     if (payment_reference) {
       await query("UPDATE orders SET payment_reference = $1 WHERE id = $2", [
         payment_reference,
-        parseInt(id),
+        parseInt(id as string),
       ]);
     }
 
     const result = await query("SELECT * FROM orders WHERE id = $1", [
-      parseInt(id),
+      parseInt(id as string),
     ]);
 
     if (result.rowCount === 0) {

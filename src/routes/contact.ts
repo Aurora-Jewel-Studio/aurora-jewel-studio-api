@@ -57,7 +57,7 @@ router.patch("/:id/read", requireAdmin as any, async (req: AuthRequest, res) => 
 
     const result = await query(
       "UPDATE contact_messages SET is_read = TRUE WHERE id = $1 RETURNING *",
-      [parseInt(id)]
+      [parseInt(id as string)]
     );
 
     if (result.rowCount === 0) {

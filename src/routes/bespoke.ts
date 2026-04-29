@@ -64,7 +64,7 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
 
     const result = await query(
       "UPDATE bespoke_requests SET status = $1 WHERE id = $2 RETURNING *",
-      [status, parseInt(id)]
+      [status, parseInt(id as string)]
     );
 
     if (result.rowCount === 0) {

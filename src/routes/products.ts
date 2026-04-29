@@ -106,7 +106,7 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
       return;
     }
 
-    values.push(parseInt(id));
+    values.push(parseInt(id as string));
     const result = await query(
       `UPDATE products SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
       values
@@ -131,7 +131,7 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
 router.delete("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const result = await query("DELETE FROM products WHERE id = $1 RETURNING *", [parseInt(id)]);
+    const result = await query("DELETE FROM products WHERE id = $1 RETURNING *", [parseInt(id as string)]);
 
     if (result.rowCount === 0) {
       res.status(404).json({ error: "Product not found." });
