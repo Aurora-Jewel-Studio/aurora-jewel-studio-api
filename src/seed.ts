@@ -104,9 +104,9 @@ const PRODUCTS: ProductSeed[] = [
     weight: 12.41,
     features: {
       Stone: "Green Onyx",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       "Secondary Stone": "Moissanite",
-      "Secondary Type": "Simulated Stone",
+      "Secondary Type": "Lab Grown Stone",
       Color: "Green",
       "Chain Length": '17" (customizable)',
       "Silver Weight": "12.410 gm",
@@ -129,7 +129,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 21.0,
     features: {
       Stone: "Pink Tourmaline | Rose Quartz",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blush Pink",
       "Bracelet Length": '7" (adjustable)',
       "Silver Weight": "21.00 gm",
@@ -148,7 +148,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 12.68,
     features: {
       Stone: "Pearl | Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "White | Silver",
       "Bracelet Length": '7.5" (adjustable)',
       "Silver Weight": "12.680 gm",
@@ -167,7 +167,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 9.38,
     features: {
       Stone: "Pearl | Green Onyx | Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "White | Green",
       "Bracelet Length": '7" (adjustable)',
       "Silver Weight": "9.380 gm",
@@ -190,7 +190,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 7.0,
     features: {
       Stone: "Green Spinel",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green",
       "Ring Size": "Adjustable",
       "Silver Weight": "7.00 gm",
@@ -209,7 +209,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 2.21,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green",
       "Ring Size": "Adjustable",
       "Silver Weight": "2.210 gm",
@@ -266,7 +266,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 3.4,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "White",
       "Ring Size": "Adjustable",
       "Silver Weight": "3.400 gm",
@@ -285,7 +285,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 2.94,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Red",
       "Ring Size": "Adjustable",
       "Silver Weight": "2.943 gm",
@@ -304,7 +304,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 2.66,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green",
       "Ring Size": "Adjustable",
       "Silver Weight": "2.666 gm",
@@ -327,7 +327,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 3.034,
     features: {
       Stone: "Black Spinel",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Black",
       "Earring Type": "Drop",
       "Silver Weight": "3.034 gm",
@@ -346,7 +346,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 4.7,
     features: {
       Stone: "Pink Tourmaline",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Pink",
       "Earring Type": "Chandelier",
       "Silver Weight": "4.70 gm",
@@ -365,7 +365,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 6.555,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blue",
       "Earring Type": "Chandelier",
       "Silver Weight": "6.555 gm",
@@ -384,7 +384,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 12.5,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green",
       "Earring Type": "Chandelier",
       "Silver Weight": "12.500 gm",
@@ -403,7 +403,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 3.55,
     features: {
       Stone: "Kyanite, Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blue, Pink",
       "Earring Type": "Hoop",
       "Silver Weight": "3.550 gm",
@@ -422,7 +422,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 16.0,
     features: {
       Stone: "Onyx",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green, Blue and Pink",
       "Earring Type": "Dangle",
       "Silver Weight": "16.00 gm",
@@ -441,7 +441,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 4.75,
     features: {
       Stone: "Sky Blue Topaz, Green Amethyst",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blue, Green",
       "Earring Type": "Drop",
       "Silver Weight": "4.750  gm",
@@ -460,7 +460,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 2.368,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Purple",
       "Earring Type": "Drop",
       "Silver Weight": "2.368 gm",
@@ -479,7 +479,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 4.547,
     features: {
       Stone: "Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Green, Blue",
       "Earring Type": "Statement",
       "Silver Weight": "4.547 gm",
@@ -498,7 +498,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 10.5,
     features: {
       Stone: "Ruby Onyx, Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Pink, White",
       "Earring Type": "Drop",
       "Silver Weight": "10.50 gm",
@@ -521,7 +521,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 4.4,
     features: {
       Stone: "Mother of Pearl",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blue, White",
       "Anklet Length": '11" (adjustable)',
       "Silver Weight": "4.400 gm",
@@ -544,7 +544,7 @@ const PRODUCTS: ProductSeed[] = [
     weight: 16.0,
     features: {
       Stone: "Crystal, Cubic Zirconia",
-      "Stone Type": "Simulated Stone",
+      "Stone Type": "Lab Grown Stone",
       Color: "Blue",
       "Pin Type": "Coat Lapel",
       "Silver Weight": "16.000 gm",
@@ -586,8 +586,8 @@ async function seed() {
 
     await query(
       `INSERT INTO products
-         (handle, title, description, price, currency, thumbnail, images, options, variants, category_handle)
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10)`,
+         (handle, title, description, price, currency, thumbnail, images, options, variants, category_handle, weight, features)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11, $12::jsonb)`,
       [
         p.handle,
         p.title,
@@ -599,6 +599,8 @@ async function seed() {
         JSON.stringify(p.options || []),
         JSON.stringify(p.variants || []),
         p.category_handle,
+        p.weight || null,
+        JSON.stringify(p.features || {})
       ],
     );
 
