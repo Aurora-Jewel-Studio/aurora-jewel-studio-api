@@ -8,6 +8,23 @@ const router = Router();
 // Docs: https://docs.khalti.com/khalti-epayment/
 // =============================================================================
 
+interface KhaltiInitiateResponse {
+  pidx: string;
+  payment_url: string;
+  expires_at: string;
+  expires_in: number;
+}
+
+interface KhaltiLookupResponse {
+  pidx: string;
+  status: string;
+  total_amount: number;
+  fee: number;
+  transaction_id: string;
+  purchase_order_id: string;
+  purchase_order_name: string;
+}
+
 /**
  * POST /api/payments/khalti/initiate
  * Initiates a Khalti payment session for an order.
@@ -53,7 +70,7 @@ router.post("/khalti/initiate", async (req, res) => {
       }
     );
 
-    const data = await response.json();
+    const data = (await response.json()) as KhaltiInitiateResponse;
 
     if (!response.ok) {
       console.error("Khalti initiate error:", data);
@@ -107,7 +124,7 @@ router.post("/khalti/verify", async (req, res) => {
       }
     );
 
-    const data = await response.json();
+    const data = (await response.json()) as KhaltiLookupResponse;
 
     if (!response.ok || data.status !== "Completed") {
       console.error("Khalti verify failed:", data);

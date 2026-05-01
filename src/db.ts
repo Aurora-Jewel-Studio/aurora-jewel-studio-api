@@ -76,8 +76,17 @@ export async function initDatabase() {
         options JSONB NOT NULL DEFAULT '[]',
         variants JSONB NOT NULL DEFAULT '[]',
         category_handle VARCHAR(255) NOT NULL,
+        weight NUMERIC,
+        features JSONB DEFAULT '{}',
         created_at TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    // Add columns if they don't exist (for existing databases)
+    await client.query(`
+      ALTER TABLE products 
+      ADD COLUMN IF NOT EXISTS weight NUMERIC,
+      ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}';
     `);
 
     console.log("✅ Database tables initialized");

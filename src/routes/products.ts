@@ -45,7 +45,7 @@ router.get("/:handle", async (req, res) => {
  */
 router.post("/", requireAdmin as any, async (req: AuthRequest, res) => {
   try {
-    const { handle, title, description, price, currency, thumbnail, images, category_handle } = req.body;
+    const { handle, title, description, price, currency, thumbnail, images, category_handle, weight, features } = req.body;
 
     if (!handle || !title || !description || price === undefined || !thumbnail || !category_handle) {
       res.status(400).json({ error: "Missing required fields." });
@@ -53,8 +53,8 @@ router.post("/", requireAdmin as any, async (req: AuthRequest, res) => {
     }
 
     const result = await query(
-      `INSERT INTO products (handle, title, description, price, currency, thumbnail, images, category_handle)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      `INSERT INTO products (handle, title, description, price, currency, thumbnail, images, category_handle, weight, features)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [
         handle,
         title,
@@ -63,7 +63,9 @@ router.post("/", requireAdmin as any, async (req: AuthRequest, res) => {
         currency || 'npr',
         thumbnail,
         images ? JSON.stringify(images) : '[]',
-        category_handle
+        category_handle,
+        weight || null,
+        features ? JSON.stringify(features) : '{}'
       ]
     );
 
@@ -85,7 +87,7 @@ router.post("/", requireAdmin as any, async (req: AuthRequest, res) => {
 router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const { handle, title, description, price, currency, thumbnail, images, category_handle } = req.body;
+    const { handle, title, description, price, currency, thumbnail, images, category_handle, weight, features } = req.body;
 
     // Build dynamic update query
     const updates: string[] = [];
@@ -100,6 +102,8 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
     if (thumbnail) { updates.push(`thumbnail = $${paramIndex++}`); values.push(thumbnail); }
     if (images) { updates.push(`images = $${paramIndex++}`); values.push(JSON.stringify(images)); }
     if (category_handle) { updates.push(`category_handle = $${paramIndex++}`); values.push(category_handle); }
+    if (weight !== undefined) { updates.push(`weight = $${paramIndex++}`); values.push(weight); }
+    if (features) { updates.push(`features = $${paramIndex++}`); values.push(JSON.stringify(features)); }
 
     if (updates.length === 0) {
       res.status(400).json({ error: "No fields to update." });
