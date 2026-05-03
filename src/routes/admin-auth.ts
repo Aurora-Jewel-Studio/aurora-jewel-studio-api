@@ -11,7 +11,7 @@ const router = Router();
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
 
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@aurorajewel.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@aurorajewelstudio.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "aurora123";
 
   if (email !== adminEmail || password !== adminPassword) {

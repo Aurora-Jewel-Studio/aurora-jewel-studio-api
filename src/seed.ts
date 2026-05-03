@@ -16,7 +16,7 @@
  *   - side2.jpg  → gallery image 2
  *
  * ADMIN CREDENTIALS are loaded from .env (ADMIN_EMAIL, ADMIN_PASSWORD)
- * Default: admin@aurorajewel.com / aurora123
+ * Default: admin@aurorajewelstudio.com / aurora123
  */
 
 import { initDatabase, query } from "./db";
@@ -563,7 +563,7 @@ async function seed() {
   await initDatabase();
 
   // ── Admin credentials info ──────────────────────────────────────────────
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@aurorajewel.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@aurorajewelstudio.com";
   const adminPassword = process.env.ADMIN_PASSWORD || "aurora123";
   console.log("🔐 Admin Credentials (from .env):");
   console.log(`   Email:    ${adminEmail}`);
