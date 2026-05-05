@@ -69,8 +69,8 @@ export async function initDatabase() {
         handle VARCHAR(255) UNIQUE NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        currency VARCHAR(10) DEFAULT 'npr',
+        price NUMERIC(10,2) NOT NULL,
+        currency VARCHAR(10) DEFAULT 'usd',
         thumbnail VARCHAR(500) NOT NULL,
         images JSONB NOT NULL DEFAULT '[]',
         options JSONB NOT NULL DEFAULT '[]',
@@ -87,6 +87,12 @@ export async function initDatabase() {
       ALTER TABLE products 
       ADD COLUMN IF NOT EXISTS weight NUMERIC,
       ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}';
+    `);
+
+    // Migrate price column from INTEGER to NUMERIC if needed
+    await client.query(`
+      ALTER TABLE products
+      ALTER COLUMN price TYPE NUMERIC(10,2);
     `);
 
     console.log("✅ Database tables initialized");

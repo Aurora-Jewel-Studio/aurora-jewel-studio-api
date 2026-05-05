@@ -11,6 +11,7 @@ import adminAuthRoutes from "./routes/admin-auth";
 import productRoutes from "./routes/products";
 import analyticsRoutes from "./routes/analytics";
 import uploadRoutes from "./routes/uploads";
+import exchangeRatesRoutes from "./routes/exchange-rates";
 import path from "path";
 
 dotenv.config();
@@ -48,6 +49,7 @@ app.use("/api/admin", adminAuthRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/exchange-rates", exchangeRatesRoutes);
 
 // Serve static files from the public directory
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));

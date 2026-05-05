@@ -61,7 +61,7 @@ interface ProductSeed {
     title: string;
     sku: string;
     options: Record<string, string>;
-    prices: { npr: number };
+    prices: { usd: number };
   }>;
   features: Record<string, string>;
 }
@@ -78,13 +78,13 @@ function silverPanchadhatuVariants(sku: string, silverPrice: number) {
       title: "Silver",
       sku: `${sku}-SLV`,
       options: { Material: "Silver" },
-      prices: { npr: silverPrice },
+      prices: { usd: silverPrice },
     },
     {
       title: "Panchadhatu",
       sku: `${sku}-PANCH`,
       options: { Material: "Panchadhatu" },
-      prices: { npr: Math.round(silverPrice * 0.6) },
+      prices: { usd: Math.round(silverPrice * 0.6 * 100) / 100 },
     },
   ];
 }
@@ -112,7 +112,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.410 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VICT-REV", 18500),
+    variants: silverPanchadhatuVariants("VICT-REV", 162.81),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -135,7 +135,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "21.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLSH-BLM", 12000),
+    variants: silverPanchadhatuVariants("BLSH-BLM", 194.2),
   },
   {
     handle: "delicate-balance",
@@ -154,7 +154,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.680 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("DLCT-BAL", 9500),
+    variants: silverPanchadhatuVariants("DLCT-BAL", 105.09),
   },
   {
     handle: "timeless-tale",
@@ -173,7 +173,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "9.380 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("TMLS-TLE", 15000),
+    variants: silverPanchadhatuVariants("TMLS-TLE", 69.56),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -196,7 +196,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "7.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLD-HRM", 14500),
+    variants: silverPanchadhatuVariants("BLD-HRM", 88.81),
   },
   {
     handle: "hex-touch",
@@ -215,7 +215,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.210 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("HEX-TCH", 11000),
+    variants: silverPanchadhatuVariants("HEX-TCH", 16.45),
   },
   {
     handle: "onyx-glide",
@@ -234,7 +234,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("ONX-GLD", 13000),
+    variants: silverPanchadhatuVariants("ONX-GLD", 103.61),
   },
   {
     handle: "royal-violet",
@@ -253,7 +253,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "9.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RYL-VLT", 16000),
+    variants: silverPanchadhatuVariants("RYL-VLT", 88.81),
   },
   {
     handle: "soft-serenity",
@@ -272,7 +272,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.400 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SFT-SRN", 9000),
+    variants: silverPanchadhatuVariants("SFT-SRN", 29.6),
   },
   {
     handle: "trinity-crest",
@@ -291,7 +291,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.943 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("TRNT-CRS", 19500),
+    variants: silverPanchadhatuVariants("TRNT-CRS", 29.6),
   },
   {
     handle: "verdant-dream",
@@ -310,7 +310,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.666 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VRDN-DRM", 13500),
+    variants: silverPanchadhatuVariants("VRDN-DRM", 25.22),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -333,7 +333,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.034 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLK-HRM", 10500),
+    variants: silverPanchadhatuVariants("BLK-HRM", 35.52),
   },
   {
     handle: "blooming-charm",
@@ -352,7 +352,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.70 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLM-CRM", 8500),
+    variants: silverPanchadhatuVariants("BLM-CRM", 88.81),
   },
   {
     handle: "blue-majesty",
@@ -371,7 +371,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.555 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLU-MJT", 16500),
+    variants: silverPanchadhatuVariants("BLU-MJT", 61.4),
   },
   {
     handle: "chandelier-spark",
@@ -390,7 +390,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.500 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CHND-SPK", 18000),
+    variants: silverPanchadhatuVariants("CHND-SPK", 91.77),
   },
   {
     handle: "circle-celeste",
@@ -409,7 +409,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.550 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CRC-CLT", 12000),
+    variants: silverPanchadhatuVariants("CRC-CLT", 47.36),
   },
   {
     handle: "dazzle-drops",
@@ -428,7 +428,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "16.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("DZL-DRP", 11500),
+    variants: silverPanchadhatuVariants("DZL-DRP", 118.41),
   },
   {
     handle: "oceanic-ombre",
@@ -447,7 +447,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.750  gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("OCN-OMB", 14000),
+    variants: silverPanchadhatuVariants("OCN-OMB", 68.08),
   },
   {
     handle: "purple-symphony",
@@ -466,7 +466,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.368 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("PRPL-SYM", 13500),
+    variants: silverPanchadhatuVariants("PRPL-SYM", 56.24),
   },
   {
     handle: "regal-magnifique",
@@ -485,7 +485,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.547 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RGL-MGN", 22000),
+    variants: silverPanchadhatuVariants("RGL-MGN", 59.2),
   },
   {
     handle: "vintage-shine",
@@ -504,7 +504,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "10.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VNT-SHN", 13000),
+    variants: silverPanchadhatuVariants("VNT-SHN", 125.81),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -527,7 +527,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.400 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CLST-CRM", 8000),
+    variants: silverPanchadhatuVariants("CLST-CRM", 118.41),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -550,7 +550,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "16.000 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("FTHR-POS", 9500),
+    variants: silverPanchadhatuVariants("FTHR-POS", 118.41),
   },
 ];
 
@@ -582,7 +582,7 @@ async function seed() {
     const silverVariant =
       p.variants.find((v) => v.options["Material"] === "Silver") ||
       p.variants[0];
-    const basePrice = silverVariant?.prices?.npr || 0;
+    const basePrice = silverVariant?.prices?.usd || 0;
 
     await query(
       `INSERT INTO products
@@ -593,19 +593,19 @@ async function seed() {
         p.title,
         p.description,
         basePrice,
-        "npr",
+        "usd",
         p.thumbnail,
         JSON.stringify(p.images || []),
         JSON.stringify(p.options || []),
         JSON.stringify(p.variants || []),
         p.category_handle,
         p.weight || null,
-        JSON.stringify(p.features || {})
+        JSON.stringify(p.features || {}),
       ],
     );
 
     console.log(
-      `   ✅ ${p.title} — ${p.category_handle} — NPR ${basePrice.toLocaleString()}`,
+      `   ✅ ${p.title} — ${p.category_handle} — USD $${basePrice.toLocaleString()}`,
     );
     inserted++;
   }
