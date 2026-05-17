@@ -4,7 +4,16 @@ const router = Router();
 
 // ── Supported currencies ─────────────────────────────────────────────────────
 const SUPPORTED_CURRENCIES = [
-  "USD", "GBP", "AUD", "CAD", "EUR", "NPR", "INR", "JPY", "CNY", "AED",
+  "USD",
+  "GBP",
+  "AUD",
+  "CAD",
+  "EUR",
+  "NPR",
+  "INR",
+  "JPY",
+  "CNY",
+  "AED",
 ];
 
 // ── In-memory cache ──────────────────────────────────────────────────────────
@@ -18,7 +27,6 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 // ── Fetch rates from free API ────────────────────────────────────────────────
 async function fetchRates(): Promise<Record<string, number>> {
-  // open.er-api.com — completely free, no API key required, ~1500 req/month
   const res = await fetch("https://open.er-api.com/v6/latest/USD");
   if (!res.ok) {
     throw new Error(`Exchange rate API returned ${res.status}`);
