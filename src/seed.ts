@@ -44,6 +44,18 @@ function productImages(
   return images;
 }
 
+function productImagesPng(
+  category: string,
+  handle: string,
+  sideCount: number = 2,
+) {
+  const images = [{ url: img(category, handle, "main.png") }];
+  for (let i = 1; i <= sideCount; i++) {
+    images.push({ url: img(category, handle, `side${i}.png`) });
+  }
+  return images;
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PRODUCT DATA
 // ─────────────────────────────────────────────────────────────────────────────
@@ -551,6 +563,1129 @@ const PRODUCTS: ProductSeed[] = [
     },
     options: [MATERIAL_OPTION],
     variants: silverPanchadhatuVariants("FTHR-POS", 118.41),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May I Collection (Drops)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May I collection
+  {
+    handle: "emerald-whisper",
+    title: "Emerald Whisper",
+    description:
+      "A breathtaking pear-cut emerald suspended from a brilliant zirconia accent, set in luminous white rhodium silver chain",
+    category_handle: "drops",
+    thumbnail: img("drops", "emerald-whisper", "main.png"),
+    images: productImagesPng("drops", "emerald-whisper"),
+    weight: 4.51,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "5.0 CT",
+      "Silver Weight": "4.51 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMR-WHP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "arc-regal",
+    title: "Arc Regal",
+    description:
+      "A sleek curved gold coated curve, flanked by two zirconia accents, suspends a vivid emerald-cut gemstone at the center",
+    category_handle: "drops",
+    thumbnail: img("drops", "arc-regal", "main.png"),
+    images: productImagesPng("drops", "arc-regal"),
+    weight: 4.90,
+    features: {
+      Stone: "Green Onyx, Moissannite",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "2.31 CT",
+      "Silver Weight": "4.90 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("ARC-RGL", 50.00),
+  },
+  // May I collection
+  {
+    handle: "silver-spear",
+    title: "Silver Spear",
+    description:
+      "A bold marquise-shaped pendant encrusted with pavé zirconia, edged with sharp silver points — where raw edge meets refined brilliance.",
+    category_handle: "drops",
+    thumbnail: img("drops", "silver-spear", "main.png"),
+    images: productImagesPng("drops", "silver-spear"),
+    weight: 1.12,
+    features: {
+      Stone: "Cubic Zirconia",
+      "Stone Type": "ADD HERE",
+      Color: "White",
+      "Stone CT": "3.50 CT",
+      "Silver Weight": "1.120 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SLV-SPR", 50.00),
+  },
+  // May I collection
+  {
+    handle: "ruby-slash",
+    title: "Ruby Slash",
+    description:
+      "Three baguette rubies set in a sleek rose gold bar, framed by delicate diamond edges — understated boldness for the modern woman.",
+    category_handle: "drops",
+    thumbnail: img("drops", "ruby-slash", "main.png"),
+    images: productImagesPng("drops", "ruby-slash"),
+    weight: 4.58,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "1.60 CT",
+      "Silver Weight": "4.58 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RBY-SLS", 50.00),
+  },
+  // May I collection
+  {
+    handle: "peridot-slash",
+    title: "Peridot Slash",
+    description:
+      "One baguette peridot set in a sleek rose gold bar, framed by delicate diamond edges — understated boldness for the modern woman.",
+    category_handle: "drops",
+    thumbnail: img("drops", "peridot-slash", "main.png"),
+    images: productImagesPng("drops", "peridot-slash"),
+    weight: 3.82,
+    features: {
+      Stone: "Peridot",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "1.00 CT",
+      "Silver Weight": "3.82 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("PDT-SLS", 50.00),
+  },
+  // May I collection
+  {
+    handle: "green-vault",
+    title: "Green Vault",
+    description:
+      "A commanding emerald-cut stone set bold in silver — unapologetic, architectural, and strikingly powerful.",
+    category_handle: "drops",
+    thumbnail: img("drops", "green-vault", "main.png"),
+    images: productImagesPng("drops", "green-vault"),
+    weight: 3.84,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "6.00 CT",
+      "Silver Weight": "3.84 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("GRN-VLT", 50.00),
+  },
+  // May I collection
+  {
+    handle: "blue-reign",
+    title: "Blue Reign",
+    description:
+      "A rich oval sapphire radiating outward in a blaze of diamonds — the kind of piece that commands a room before you say a word.",
+    category_handle: "drops",
+    thumbnail: img("drops", "blue-reign", "main.png"),
+    images: productImagesPng("drops", "blue-reign"),
+    weight: 6.65,
+    features: {
+      Stone: "Blue Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "2.75 CT",
+      "Silver Weight": "6.65 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("BLU-RGN", 50.00),
+  },
+  // May I collection
+  {
+    handle: "infinity-embrace",
+    title: "Infinity Embrace",
+    description:
+      "A brilliant diamond cradled in a fluid silver twist — pure light, captured in motion.",
+    category_handle: "drops",
+    thumbnail: img("drops", "infinity-embrace", "main.png"),
+    images: productImagesPng("drops", "infinity-embrace"),
+    weight: 6.17,
+    features: {
+      Stone: "Moissanite",
+      "Stone Type": "ADD HERE",
+      Color: "White",
+      "Stone CT": "1.55 CT",
+      "Silver Weight": "6.17 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("INF-EMB", 50.00),
+  },
+  // May I collection
+  {
+    handle: "infinity-embrace-pendant",
+    title: "Infinity Embrace Pendant",
+    description:
+      "A single round-cut moissanite cradled in a twisted infinity setting on a delicate silver chain — simple, timeless, and quietly stunning.",
+    category_handle: "drops",
+    thumbnail: img("drops", "infinity-embrace", "main.png"),
+    images: productImagesPng("drops", "infinity-embrace"),
+    weight: 5.86,
+    features: {
+      Stone: "Moissanite",
+      "Stone Type": "ADD HERE",
+      Color: "White",
+      "Stone CT": "1.55 CT",
+      "Silver Weight": "5.86 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("INF-EMB-PND", 50.00),
+  },
+  // May I collection
+  {
+    handle: "scattered-bloom",
+    title: "Scattered Bloom",
+    description:
+      "A playful trail of multicolored gemstones drifting across silver — effortlessly whimsical, like wildflowers strung on light.",
+    category_handle: "drops",
+    thumbnail: img("drops", "scattered-bloom", "main.png"),
+    images: productImagesPng("drops", "scattered-bloom"),
+    weight: 10.50,
+    features: {
+      Stone: "Tourmaline",
+      "Stone Type": "ADD HERE",
+      Color: "Multi-color",
+      "Stone CT": "20.00 CT",
+      "Silver Weight": "10.50 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SCT-BLM", 50.00),
+  },
+  // May I collection
+  {
+    handle: "sapphire-whisper",
+    title: "Sapphire Whisper",
+    description:
+      "A breathtaking pear-cut blue sapphire suspended from a brilliant zirconia accent, set in luminous white rhodium silver chain",
+    category_handle: "drops",
+    thumbnail: img("drops", "sapphire-whisper", "main.png"),
+    images: productImagesPng("drops", "sapphire-whisper"),
+    weight: 4.47,
+    features: {
+      Stone: "Blue Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "4.10 CT",
+      "Silver Weight": "4.47 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SAP-WHP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "velvet-ruby",
+    title: "Velvet Ruby",
+    description:
+      "A pear-cut ruby wrapped in a full zirconia halo, suspended from a marquise floral cluster — dramatic, opulent, and red-carpet ready.",
+    category_handle: "drops",
+    thumbnail: img("drops", "velvet-ruby", "main.png"),
+    images: productImagesPng("drops", "velvet-ruby"),
+    weight: 9.06,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "9.90 CT",
+      "Silver Weight": "9.06 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VLV-RBY", 50.00),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May I Collection (Nexus)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May I collection
+  {
+    handle: "emerald-embrace",
+    title: "Emerald Embrace",
+    description:
+      "A lush oval emerald haloed in zirconia, with a braided silver bracelet — like luxury wrapped around your wrist.",
+    category_handle: "nexus",
+    thumbnail: img("nexus", "emerald-embrace", "main.png"),
+    images: productImagesPng("nexus", "emerald-embrace"),
+    weight: 12.67,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "6.0 CT",
+      "Silver Weight": "12.67 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMR-EMB", 50.00),
+  },
+  // May I collection
+  {
+    handle: "crimson-tale",
+    title: "Crimson Tale",
+    description:
+      "A bold square-cut ruby locked in gold on a sleek gold coated chain — structured desire, wrapped around your wrist.",
+    category_handle: "nexus",
+    thumbnail: img("nexus", "crimson-tale", "main.png"),
+    images: productImagesPng("nexus", "crimson-tale"),
+    weight: 10.41,
+    features: {
+      Stone: "Crystal",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "5.25 CT",
+      "Silver Weight": "10.41 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("CRM-TLE", 50.00),
+  },
+  // May I collection
+  {
+    handle: "timeless-cuff",
+    title: "Timeless Cuff",
+    description:
+      "Minimalist gold open-bangle with a single bezel-set square green onyx stone wrapped in gold e-coating — clean, confident, and effortlessly chic.",
+    category_handle: "nexus",
+    thumbnail: img("nexus", "timeless-cuff", "main.png"),
+    images: productImagesPng("nexus", "timeless-cuff"),
+    weight: 10.41,
+    features: {
+      Stone: "Green Onyx",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "5.25 CT",
+      "Silver Weight": "10.41 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("TML-CFF", 50.00),
+  },
+  // May I collection
+  {
+    handle: "sapphire-royale",
+    title: "Sapphire Royale",
+    description:
+      "A stacked pair of silver bangles alternating oval sapphires and pavé zirconia — rich, regal, and made to be worn together.",
+    category_handle: "nexus",
+    thumbnail: img("nexus", "sapphire-royale", "main.png"),
+    images: productImagesPng("nexus", "sapphire-royale"),
+    weight: 24.13,
+    features: {
+      Stone: "Kyanite",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "17.00 CT",
+      "Silver Weight": "24.13 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SAP-RYL", 50.00),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May I Collection (Sparkles)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May I collection
+  {
+    handle: "amber-drop",
+    title: "Amber Drop",
+    description:
+      "Two emerald-cut citrines dripping from a zirconia, suspended from silver lever backs — warm, bold, and dangerously gorgeous.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "amber-drop", "main.png"),
+    images: productImagesPng("sparkles", "amber-drop"),
+    weight: 2.80,
+    features: {
+      Stone: "Citrine",
+      "Stone Type": "ADD HERE",
+      Color: "Yellow",
+      "Stone CT": "3.95 CT",
+      "Silver Weight": "2.80 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("AMB-DRP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "chandelier-touch",
+    title: "Chandelier Touch",
+    description:
+      "Gold-toned chandelier earrings with ruby red teardrop stones and zirconia accents in a cascading drop design – evergreen and sparkling",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "chandelier-touch", "main.png"),
+    images: productImagesPng("sparkles", "chandelier-touch"),
+    weight: 12.50,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "17.70 CT",
+      "Silver Weight": "12.50 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("CHD-TCH", 50.00),
+  },
+  // May I collection
+  {
+    handle: "solitaire-drops",
+    title: "Solitaire Drops",
+    description:
+      "Gold coated hoops with pavé-set crystals and a dangling round-cut CZ stone for effortless everyday elegance.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "solitaire-drops", "main.png"),
+    images: productImagesPng("sparkles", "solitaire-drops"),
+    weight: 3.50,
+    features: {
+      Stone: "Zirconia",
+      "Stone Type": "ADD HERE",
+      Color: "White",
+      "Stone CT": "1.50 CT",
+      "Silver Weight": "3.50 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SLT-DRP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "mosaic-blue",
+    title: "Mosaic Blue",
+    description:
+      "Chandelier drop earrings layering London & Sky Blue Topaz cuts of teal stones in a silver pavé setting — perfect for making a statement.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "mosaic-blue", "main.png"),
+    images: productImagesPng("sparkles", "mosaic-blue"),
+    weight: 15.97,
+    features: {
+      Stone: "London Blue Topaz, Sky Blue Topaz",
+      "Stone Type": "ADD HERE",
+      Color: "Teal / Blue",
+      "Stone CT": "11.90 CT",
+      "Silver Weight": "15.97 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("MSC-BLU", 50.00),
+  },
+  // May I collection
+  {
+    handle: "verde-luxe",
+    title: "Verde Luxe",
+    description:
+      "Rich oval emeralds wrapped in a full zirconia halo, with marquise and pear-cut stones cascading below — understated luxury at its finest.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "verde-luxe", "main.png"),
+    images: productImagesPng("sparkles", "verde-luxe"),
+    weight: 6.93,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "5.10 CT",
+      "Silver Weight": "6.93 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VRD-LXE", 50.00),
+  },
+  // May I collection
+  {
+    handle: "midnight-cluster",
+    title: "Midnight Cluster",
+    description:
+      "A bold emerald-cut navy sapphire crowned in gold plating, dropping into a trio of crystal teardrops for a polished, evening-ready finish.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "midnight-cluster", "main.png"),
+    images: productImagesPng("sparkles", "midnight-cluster"),
+    weight: 5.50,
+    features: {
+      Stone: "Blue Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Navy Blue",
+      "Stone CT": "7.50 CT",
+      "Silver Weight": "5.50 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("MID-CLS", 50.00),
+  },
+  // May I collection
+  {
+    handle: "olive-dangle",
+    title: "Olive Dangle",
+    description:
+      "Delicate silver drop earrings with cushion and teardrop peridot stones linked by a trail of zirconia accents — effortlessly fresh and refined.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "olive-dangle", "main.png"),
+    images: productImagesPng("sparkles", "olive-dangle"),
+    weight: 6.02,
+    features: {
+      Stone: "Peridot",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "8.40 CT",
+      "Silver Weight": "6.02 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("OLV-DNG", 50.00),
+  },
+  // May I collection
+  {
+    handle: "crystal-cluster",
+    title: "Crystal Cluster",
+    description:
+      "Gold bezel-set emerald-cut crystals arranged in a geometric cluster, finished with round CZ accents — bold structure meets vintage glamour.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "crystal-cluster", "main.png"),
+    images: productImagesPng("sparkles", "crystal-cluster"),
+    weight: 9.00,
+    features: {
+      Stone: "Moissanite, Polki",
+      "Stone Type": "ADD HERE",
+      Color: "White",
+      "Stone CT": "6.00 CT",
+      "Silver Weight": "9.00 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("CRY-CLS", 50.00),
+  },
+  // May I collection
+  {
+    handle: "emerald-dangle",
+    title: "Emerald Dangle",
+    description:
+      "Delicate silver teardrop earrings with emerald stones connected by zirconia-cut links on a sleek silver drop — effortlessly elegant.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "emerald-dangle", "main.png"),
+    images: productImagesPng("sparkles", "emerald-dangle"),
+    weight: 6.01,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "9.55 CT",
+      "Silver Weight": "6.01 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMR-DNG", 50.00),
+  },
+  // May I collection
+  {
+    handle: "sunset-stud",
+    title: "Sunset Stud",
+    description:
+      "Trillion-cut citrine studs topped with a trio of zirconia accents — warm, radiant, and polished enough for any occasion.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "sunset-stud", "main.png"),
+    images: productImagesPng("sparkles", "sunset-stud"),
+    weight: 1.16,
+    features: {
+      Stone: "Citrine",
+      "Stone Type": "ADD HERE",
+      Color: "Yellow",
+      "Stone CT": "1.25 CT",
+      "Silver Weight": "1.16 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SUN-STD", 50.00),
+  },
+  // May I collection
+  {
+    handle: "luna-drops",
+    title: "Luna Drops",
+    description:
+      "Sleek polished silver ball drops on a simple hook — minimal, modern, and endlessly wearable.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "luna-drops", "main.png"),
+    images: productImagesPng("sparkles", "luna-drops"),
+    weight: 3.25,
+    features: {
+      Stone: "ADD HERE",
+      "Stone Type": "ADD HERE",
+      Color: "Silver",
+      "Stone CT": "ADD HERE",
+      "Silver Weight": "3.25 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("LUN-DRP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "medallion-rosette",
+    title: "Medallion Rosette",
+    description:
+      "Blush pink teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "medallion-rosette", "main.png"),
+    images: productImagesPng("sparkles", "medallion-rosette"),
+    weight: 11.53,
+    features: {
+      Stone: "Rose Quartz",
+      "Stone Type": "ADD HERE",
+      Color: "Pink",
+      "Stone CT": "7.10 CT",
+      "Silver Weight": "11.53 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("MDL-RST", 50.00),
+  },
+  // May I collection
+  {
+    handle: "emerald-stud",
+    title: "Emerald Stud",
+    description:
+      "Trillion-cut emerald studs topped with a trio of zirconia accents — warm, radiant, and polished enough for any occasion.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "emerald-stud", "main.png"),
+    images: productImagesPng("sparkles", "emerald-stud"),
+    weight: 1.01,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "1.25 CT",
+      "Silver Weight": "1.01 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMR-STD", 50.00),
+  },
+  // May I collection
+  {
+    handle: "medallion-sapphire",
+    title: "Medallion Sapphire",
+    description:
+      "Blue sapphire teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "medallion-sapphire", "main.png"),
+    images: productImagesPng("sparkles", "medallion-sapphire"),
+    weight: 10.73,
+    features: {
+      Stone: "Blue Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "5.30 CT",
+      "Silver Weight": "10.73 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("MDL-SAP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "medallion-emerald",
+    title: "Medallion Emerald",
+    description:
+      "Emerald teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "medallion-emerald", "main.png"),
+    images: productImagesPng("sparkles", "medallion-emerald"),
+    weight: 11.16,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "5.25 CT",
+      "Silver Weight": "11.16 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("MDL-EMR", 50.00),
+  },
+  // May I collection
+  {
+    handle: "rose-drop",
+    title: "Rose Drop",
+    description:
+      "Two emerald-cut rose quartz stones dripping from a zirconia, suspended from silver lever backs — warm, bold, and dangerously gorgeous.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "rose-drop", "main.png"),
+    images: productImagesPng("sparkles", "rose-drop"),
+    weight: 2.93,
+    features: {
+      Stone: "Rose Quartz",
+      "Stone Type": "ADD HERE",
+      Color: "Pink",
+      "Stone CT": "5.05 CT",
+      "Silver Weight": "2.93 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RSE-DRP", 50.00),
+  },
+  // May I collection
+  {
+    handle: "rose-dangle",
+    title: "Rose Dangle",
+    description:
+      "Delicate silver teardrop earrings with rose quartz stones connected by zirconia-cut links on a sleek silver drop — effortlessly elegant.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "rose-dangle", "main.png"),
+    images: productImagesPng("sparkles", "rose-dangle"),
+    weight: 5.94,
+    features: {
+      Stone: "Rose Quartz",
+      "Stone Type": "ADD HERE",
+      Color: "Pink",
+      "Stone CT": "8.90 CT",
+      "Silver Weight": "5.94 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RSE-DNG", 50.00),
+  },
+  // May I collection
+  {
+    handle: "velvet-ruby-earrings",
+    title: "Velvet Ruby Earrings",
+    description:
+      "A pear-cut ruby wrapped in a full zirconia halo, suspended from a marquise floral cluster — dramatic, opulent, and red-carpet ready.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "velvet-ruby", "main.png"),
+    images: productImagesPng("sparkles", "velvet-ruby"),
+    weight: 9.06,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "9.90 CT",
+      "Silver Weight": "9.06 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VLV-RBY-ER", 50.00),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May II Collection (Drops)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May II collection
+  {
+    handle: "green-envy",
+    title: "Green Envy",
+    description:
+      "A trail of round zirconia flows down a delicate silver chain, leading the eye to a bold emerald-cut green stone — simple, striking, and impossible to ignore.",
+    category_handle: "drops",
+    thumbnail: img("drops", "green-envy", "main.png"),
+    images: productImagesPng("drops", "green-envy"),
+    weight: 6.49,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "3.10 CT",
+      "Silver Weight": "6.49 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("GRN-ENV", 50.00),
+  },
+  // May II collection
+  {
+    handle: "ruby-envy",
+    title: "Ruby Envy",
+    description:
+      "A trail of round zirconia flows down a delicate silver chain, leading the eye to a bold emerald-cut ruby — simple, striking, and impossible to ignore.",
+    category_handle: "drops",
+    thumbnail: img("drops", "ruby-envy", "main.png"),
+    images: productImagesPng("drops", "ruby-envy"),
+    weight: 6.63,
+    features: {
+      Stone: "Ruby Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "4.50 CT",
+      "Silver Weight": "6.63 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RBY-ENV", 50.00),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May II Collection (Essence)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May II collection
+  {
+    handle: "scarlet-garnet",
+    title: "Scarlet Garnet",
+    description:
+      "A deep red oval garnet sits at the center of a glittering zirconia halo, set in warm gold with a beautifully tapered split-band.",
+    category_handle: "essence",
+    thumbnail: img("essence", "scarlet-garnet", "main.png"),
+    images: productImagesPng("essence", "scarlet-garnet"),
+    weight: 2.02,
+    features: {
+      Stone: "Garnet",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "1.20 CT",
+      "Silver Weight": "2.02 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("SCL-GRN", 50.00),
+  },
+  // May II collection
+  {
+    handle: "verdant-trillion",
+    title: "Verdant Trillion",
+    description:
+      "A vivid trillion-cut emerald sits at the heart of a bold double halo — sparkling zirconia ringed by deep green emeralds — all set in a striking silver-toned band.",
+    category_handle: "essence",
+    thumbnail: img("essence", "verdant-trillion", "main.png"),
+    images: productImagesPng("essence", "verdant-trillion"),
+    weight: 6.08,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "2.25 CT",
+      "Silver Weight": "6.08 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VRD-TRL", 50.00),
+  },
+  // May II collection
+  {
+    handle: "golden-marquise",
+    title: "Golden Marquise",
+    description:
+      "A sleek marquise-cut green onyx stone framed in gold beading pairs effortlessly with zirconia outline companion ring, made to be worn together or apart.",
+    category_handle: "essence",
+    thumbnail: img("essence", "golden-marquise", "main.png"),
+    images: productImagesPng("essence", "golden-marquise"),
+    weight: 3.75,
+    features: {
+      Stone: "Green Onyx",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "6.50 CT",
+      "Silver Weight": "3.75 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("GLD-MRQ", 50.00),
+  },
+  // May II collection
+  {
+    handle: "ruby-trillion",
+    title: "Ruby Trillion",
+    description:
+      "A vivid trillion-cut ruby sits at the heart of a bold zirconia halo — sparkling zirconia ringed by deep ruby pearls — all set in a striking silver-toned band.",
+    category_handle: "essence",
+    thumbnail: img("essence", "ruby-trillion", "main.png"),
+    images: productImagesPng("essence", "ruby-trillion"),
+    weight: 6.27,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "2.90 CT",
+      "Silver Weight": "6.27 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RBY-TRL", 50.00),
+  },
+  // May II collection
+  {
+    handle: "blue-horizon",
+    title: "Blue Horizon",
+    description:
+      "A deep sapphire blue center stone flanked by two sky blue topaz ovals, all set in a clean silver band for a cool, effortlessly elegant look.",
+    category_handle: "essence",
+    thumbnail: img("essence", "blue-horizon", "main.png"),
+    images: productImagesPng("essence", "blue-horizon"),
+    weight: 3.77,
+    features: {
+      Stone: "Sapphire",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "5.0 CT",
+      "Silver Weight": "3.77 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("BLU-HRZ", 50.00),
+  },
+  // May II collection
+  {
+    handle: "red-horizon",
+    title: "Red Horizon",
+    description:
+      "A deep ruby center stone flanked by two rose quartz ovals, all set in a clean silver band for a cool, effortlessly elegant look.",
+    category_handle: "essence",
+    thumbnail: img("essence", "red-horizon", "main.png"),
+    images: productImagesPng("essence", "red-horizon"),
+    weight: 3.54,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "8.00 CT",
+      "Silver Weight": "3.54 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RED-HRZ", 50.00),
+  },
+  // May II collection
+  {
+    handle: "tanzanite-trillion",
+    title: "Tanzanite Trillion",
+    description:
+      "A vivid trillion-cut tanzanite sits at the heart of a bold zirconia halo — sparkling zirconia ringed by blue pearls — all set in a striking silver-toned band.",
+    category_handle: "essence",
+    thumbnail: img("essence", "tanzanite-trillion", "main.png"),
+    images: productImagesPng("essence", "tanzanite-trillion"),
+    weight: 6.39,
+    features: {
+      Stone: "Tanzanite",
+      "Stone Type": "ADD HERE",
+      Color: "Blue / Purple",
+      "Stone CT": "2.20 CT",
+      "Silver Weight": "6.39 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("TZN-TRL", 50.00),
+  },
+  // May II collection
+  {
+    handle: "garnet-garnish",
+    title: "Garnet Garnish",
+    description:
+      "Three oval-cut garnets nestled in glittering cubic zirconia halos, set in sterling silver for a timeless, regal elegance.",
+    category_handle: "essence",
+    thumbnail: img("essence", "garnet-garnish", "main.png"),
+    images: productImagesPng("essence", "garnet-garnish"),
+    weight: 4.00,
+    features: {
+      Stone: "Garnet",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "3.50 CT",
+      "Silver Weight": "4.00 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("GRN-GRN", 50.00),
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  May II Collection (Sparkles)
+  // ═══════════════════════════════════════════════════════════════════════════
+  // May II collection
+  {
+    handle: "ruby-reverie",
+    title: "Ruby Reverie",
+    description:
+      "A zirconia flower cluster cascades into a sparkling baguette drop, finishing with a rich ruby teardrop wrapped in a halo — effortlessly dramatic.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "ruby-reverie", "main.png"),
+    images: productImagesPng("sparkles", "ruby-reverie"),
+    weight: 6.53,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "9.65 CT",
+      "Silver Weight": "6.53 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RBY-RVR", 50.00),
+  },
+  // May II collection
+  {
+    handle: "crimson-descent",
+    title: "Crimson Descent",
+    description:
+      "A pear-cut zirconia halo stud flows into a delicate baguette, dropping into a bold ruby teardrop — clean, linear, and quietly show-stopping.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "crimson-descent", "main.png"),
+    images: productImagesPng("sparkles", "crimson-descent"),
+    weight: 12.66,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "9.60 CT",
+      "Silver Weight": "12.66 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("CRM-DSC", 50.00),
+  },
+  // May II collection
+  {
+    handle: "jade-and-ice",
+    title: "Jade & Ice",
+    description:
+      "A zirconia-framed emerald-cut stud drops into an open teardrop halo cradling a lush green pear — bold geometry with a touch of old-world glamour.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "jade-and-ice", "main.png"),
+    images: productImagesPng("sparkles", "jade-and-ice"),
+    weight: 8.39,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "13.25 CT",
+      "Silver Weight": "8.39 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("JDE-ICE", 50.00),
+  },
+  // May II collection
+  {
+    handle: "pink-oscillate",
+    title: "Pink Oscillate",
+    description:
+      "Two long zirconia studded rectangle drops swing into a soft blush pink teardrop — sleek, modern, and just the right amount of bold.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "pink-oscillate", "main.png"),
+    images: productImagesPng("sparkles", "pink-oscillate"),
+    weight: 18.35,
+    features: {
+      Stone: "Rose Quartz",
+      "Stone Type": "ADD HERE",
+      Color: "Pink",
+      "Stone CT": "12.80 CT",
+      "Silver Weight": "18.35 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("PNK-OSC", 50.00),
+  },
+  // May II collection
+  {
+    handle: "ruby-bloom",
+    title: "Ruby Bloom",
+    description:
+      "Two ruby halos — one stacked above the other — each bursting with a sunburst of zirconia, like a flower caught mid-bloom.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "ruby-bloom", "main.png"),
+    images: productImagesPng("sparkles", "ruby-bloom"),
+    weight: 8.26,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "14.80 CT",
+      "Silver Weight": "8.26 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RBY-BLM", 50.00),
+  },
+  // May II collection
+  {
+    handle: "emerald-sun",
+    title: "Emerald Sun",
+    description:
+      "A lush oval deep forest emerald ringed by a bold burst of zirconia petals — like a sunflower, but make it priceless.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "emerald-sun", "main.png"),
+    images: productImagesPng("sparkles", "emerald-sun"),
+    weight: 4.81,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "6.20 CT",
+      "Silver Weight": "4.81 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMR-SUN", 50.00),
+  },
+  // May II collection
+  {
+    handle: "blue-oscillate",
+    title: "Blue Oscillate",
+    description:
+      "Two long zirconia studded rectangle drops swing into a soft blush blue teardrop — sleek, modern, and just the right amount of bold.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "blue-oscillate", "main.png"),
+    images: productImagesPng("sparkles", "blue-oscillate"),
+    weight: 18.51,
+    features: {
+      Stone: "London Blue Topaz",
+      "Stone Type": "ADD HERE",
+      Color: "Blue",
+      "Stone CT": "4.90 CT",
+      "Silver Weight": "18.51 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("BLU-OSC", 50.00),
+  },
+  // May II collection
+  {
+    handle: "red-square",
+    title: "Red Square",
+    description:
+      "A clean emerald-cut ruby hangs from a simple zirconia cluster on a classic lever-back — no fuss, just a deep red stone that does all the talking.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "red-square", "main.png"),
+    images: productImagesPng("sparkles", "red-square"),
+    weight: 2.86,
+    features: {
+      Stone: "Ruby",
+      "Stone Type": "ADD HERE",
+      Color: "Red",
+      "Stone CT": "4.80 CT",
+      "Silver Weight": "2.86 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("RED-SQR", 50.00),
+  },
+  // May II collection
+  {
+    handle: "empress-green",
+    title: "Empress Green",
+    description:
+      "Oval emerald centre embraced by a double halo of sparkling zirconia and vivid green emerald rounds, set in lustrous sterling silver.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "empress-green", "main.png"),
+    images: productImagesPng("sparkles", "empress-green"),
+    weight: 7.13,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "3.95 CT",
+      "Silver Weight": "7.13 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("EMP-GRN", 50.00),
+  },
+  // May II collection
+  {
+    handle: "velvet-verde",
+    title: "Velvet Verde",
+    description:
+      "Cushion-cut emeralds draped in a single halo of brilliant zirconia rounds — where deep ocean green meets icy white fire.",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "velvet-verde", "main.png"),
+    images: productImagesPng("sparkles", "velvet-verde"),
+    weight: 4.62,
+    features: {
+      Stone: "Emerald",
+      "Stone Type": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "4.95 CT",
+      "Silver Weight": "4.62 gm",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VLV-VRD", 50.00),
+  },
+  // May II collection
+  {
+    handle: "verdant-horizon",
+    title: "Verdant Horizon",
+    description: "ADD HERE",
+    category_handle: "sparkles",
+    thumbnail: img("sparkles", "verdant-horizon", "main.png"),
+    images: productImagesPng("sparkles", "verdant-horizon"),
+    weight: null,
+    features: {
+      Stone: "ADD HERE",
+      "Stone Type": "ADD HERE",
+      Color: "ADD HERE",
+      "Stone CT": "ADD HERE",
+      "Silver Weight": "ADD HERE",
+    },
+    options: [MATERIAL_OPTION],
+    variants: silverPanchadhatuVariants("VRD-HRZ", 50.00),
   },
 ];
 
