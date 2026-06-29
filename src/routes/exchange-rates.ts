@@ -32,7 +32,7 @@ async function fetchRates(): Promise<Record<string, number>> {
     throw new Error(`Exchange rate API returned ${res.status}`);
   }
 
-  const data = await res.json();
+  const data = (await res.json()) as any;
   if (data.result !== "success") {
     throw new Error("Exchange rate API did not return success");
   }

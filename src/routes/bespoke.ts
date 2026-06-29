@@ -10,7 +10,7 @@ const router = Router();
  */
 router.post("/", async (req, res) => {
   try {
-    const { first_name, last_name, email, phone, budget, description } =
+    const { first_name, last_name, email, phone, budget, description, inquiry_type, reference_image } =
       req.body;
 
     if (!first_name || !last_name || !email || !description) {
@@ -20,9 +20,19 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    if (
+      reference_image &&
+      (typeof reference_image !== "string" ||
+        !reference_image.startsWith("data:image/") ||
+        reference_image.length > 1_400_000)
+    ) {
+      res.status(400).json({ error: "Reference image must be a valid image under 1MB." });
+      return;
+    }
+
     const result = await query(
-      "INSERT INTO bespoke_requests (first_name, last_name, email, phone, budget, description, status) VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *",
-      [first_name, last_name, email, phone || null, budget || null, description]
+      "INSERT INTO bespoke_requests (first_name, last_name, email, phone, budget, description, inquiry_type, reference_image, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending') RETURNING *",
+      [first_name, last_name, email, phone || null, budget || null, description, inquiry_type || "Custom", reference_image || null]
     );
 
     res.status(201).json({ bespoke_request: result.rows[0] });

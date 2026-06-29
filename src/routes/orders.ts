@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
+import { CartPricingError, priceCartItems } from "../utils/order-pricing";
 
 const router = Router();
 
@@ -16,18 +17,19 @@ router.post("/", async (req, res) => {
       customer_email,
       customer_phone,
       shipping_address,
-      total_amount,
       currency,
       payment_method,
     } = req.body;
 
-    if (!items || !customer_name || !customer_email || !total_amount) {
+    if (!items || !customer_name || !customer_email) {
       res.status(400).json({
         error:
-          "Items, customer name, customer email, and total amount are required.",
+          "Items, customer name, and customer email are required.",
       });
       return;
     }
+
+    const pricedCart = await priceCartItems(items, currency || "usd");
 
     const result = await query(
       `INSERT INTO orders (
@@ -38,13 +40,13 @@ router.post("/", async (req, res) => {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', 'pending')
       RETURNING *`,
       [
-        JSON.stringify(items),
+        JSON.stringify(pricedCart.items),
         customer_name,
         customer_email,
         customer_phone || null,
         shipping_address || null,
-        total_amount,
-        currency || "npr",
+        pricedCart.totalAmount,
+        pricedCart.currency,
         payment_method || "cod",
       ]
     );
@@ -52,6 +54,10 @@ router.post("/", async (req, res) => {
     res.status(201).json({ order: result.rows[0] });
   } catch (error) {
     console.error("Order create error:", error);
+    if (error instanceof CartPricingError) {
+      res.status(400).json({ error: error.message });
+      return;
+    }
     res.status(500).json({ error: "Failed to create order." });
   }
 });

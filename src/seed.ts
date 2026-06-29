@@ -11,9 +11,9 @@
  *
  * IMAGE CONVENTION:
  *   Images are stored in: storefront/public/images/products/[category]/[product]/
- *   - main.jpg   → thumbnail
- *   - side1.jpg  → gallery image 1
- *   - side2.jpg  → gallery image 2
+ *   - main.webp   → thumbnail
+ *   - side1.webp  → gallery image 1
+ *   - side2.webp  → gallery image 2
  *
  * ADMIN CREDENTIALS are loaded from .env (ADMIN_EMAIL, ADMIN_PASSWORD)
  * Default: admin@aurorajewelstudio.com / aurora123
@@ -23,6 +23,7 @@ import { initDatabase, query } from "./db";
 import dotenv from "dotenv";
 
 dotenv.config();
+dotenv.config({ path: ".env.local", override: true });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER: Build image paths from category + handle
@@ -37,24 +38,15 @@ function productImages(
   handle: string,
   sideCount: number = 2,
 ) {
-  const images = [{ url: img(category, handle, "main.jpg") }];
+  const images = [{ url: img(category, handle, "main.webp") }];
   for (let i = 1; i <= sideCount; i++) {
-    images.push({ url: img(category, handle, `side${i}.jpg`) });
+    images.push({ url: img(category, handle, `side${i}.webp`) });
   }
   return images;
 }
 
-function productImagesPng(
-  category: string,
-  handle: string,
-  sideCount: number = 2,
-) {
-  const images = [{ url: img(category, handle, "main.png") }];
-  for (let i = 1; i <= sideCount; i++) {
-    images.push({ url: img(category, handle, `side${i}.png`) });
-  }
-  return images;
-}
+// Alias — kept for backward compatibility, both now produce .webp
+const productImagesWebp = productImages;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRODUCT DATA
@@ -87,12 +79,14 @@ const MATERIAL_OPTION = {
 function silverPanchadhatuVariants(sku: string, silverPrice: number) {
   return [
     {
+      id: `${sku}-SLV`,
       title: "Silver",
       sku: `${sku}-SLV`,
       options: { Material: "Silver" },
       prices: { usd: silverPrice },
     },
     {
+      id: `${sku}-PANCH`,
       title: "Panchadhatu",
       sku: `${sku}-PANCH`,
       options: { Material: "Panchadhatu" },
@@ -111,7 +105,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A radiant crystal sunburst pendant adorned with sparkling zirconia, cascading into a lush green onyx gemstone drop on a delicate silver chain.",
     category_handle: "drops",
-    thumbnail: img("drops", "victorian-reverie", "main.jpg"),
+    thumbnail: img("drops", "victorian-reverie", "main.webp"),
     images: productImages("drops", "victorian-reverie"),
     weight: 12.41,
     features: {
@@ -136,7 +130,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Floral-inspired bangle featuring vibrant pink tourmaline gemstones in mixed oval and marquise cuts, artfully arranged in a garden-inspired blooming flower design.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "blush-bloom", "main.jpg"),
+    thumbnail: img("nexus", "blush-bloom", "main.webp"),
     images: productImages("nexus", "blush-bloom"),
     weight: 21.0,
     features: {
@@ -155,7 +149,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Lustrous cream pearls nestle between diamond-studded spirals in this gracefully twisted open bangle, merging classic elegance with a modern appeal.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "delicate-balance", "main.jpg"),
+    thumbnail: img("nexus", "delicate-balance", "main.webp"),
     images: productImages("nexus", "delicate-balance"),
     weight: 12.68,
     features: {
@@ -174,7 +168,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A mint green onyx square and luminous pearl harmonize on a delicately textured gold bracelet, creating a refined pairing of elegant and aesthetic.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "timeless-tale", "main.jpg"),
+    thumbnail: img("nexus", "timeless-tale", "main.webp"),
     images: productImages("nexus", "timeless-tale"),
     weight: 9.38,
     features: {
@@ -197,7 +191,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A striking cocktail ring with geometric symmetry. Bold lines meet soft curves, set with a deep amethyst center stone.",
     category_handle: "essence",
-    thumbnail: img("essence", "bold-harmony", "main.jpg"),
+    thumbnail: img("essence", "bold-harmony", "main.webp"),
     images: productImages("essence", "bold-harmony"),
     weight: 7.0,
     features: {
@@ -216,7 +210,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A delicate gold-polished band crowned with a vivid hexagonal green cubic zirconia, where modern geometry meets timeless elegance.",
     category_handle: "essence",
-    thumbnail: img("essence", "hex-touch", "main.jpg"),
+    thumbnail: img("essence", "hex-touch", "main.webp"),
     images: productImages("essence", "hex-touch"),
     weight: 2.21,
     features: {
@@ -235,7 +229,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Statement ring showcasing a graceful row of rich green onyx cabochons elegantly framed by brilliant cubic zirconia-studded bands in soft gold-plated tone creating flair & grace.",
     category_handle: "essence",
-    thumbnail: img("essence", "onyx-glide", "main.jpg"),
+    thumbnail: img("essence", "onyx-glide", "main.webp"),
     images: productImages("essence", "onyx-glide"),
     weight: 2.0,
     features: {
@@ -254,7 +248,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Satement ring featuring a magnificent emerald-cut amethyst centerpiece in rich violet hues, dramatically flanked by brilliant aqua-blue topaz stones in a vintage three-stone design.",
     category_handle: "essence",
-    thumbnail: img("essence", "royal-violet", "main.jpg"),
+    thumbnail: img("essence", "royal-violet", "main.webp"),
     images: productImages("essence", "royal-violet"),
     weight: 9.5,
     features: {
@@ -273,7 +267,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Luminous zirconia in soft pastels meets sparkling pave accents, creating an ethereal collection that captures the delicate design for this ring.",
     category_handle: "essence",
-    thumbnail: img("essence", "soft-serenity", "main.jpg"),
+    thumbnail: img("essence", "soft-serenity", "main.webp"),
     images: productImages("essence", "soft-serenity"),
     weight: 3.4,
     features: {
@@ -292,7 +286,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Contemporary ring showcasing a trillion cut royal red gemstone with exceptional clarity and depth, arranged in a classic yet modern sleek setting to make a statement piece.",
     category_handle: "essence",
-    thumbnail: img("essence", "trinity-crest", "main.jpg"),
+    thumbnail: img("essence", "trinity-crest", "main.webp"),
     images: productImages("essence", "trinity-crest"),
     weight: 2.94,
     features: {
@@ -311,7 +305,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A luminous trillion-cut green gemstone sits in a gracefully split gold band, blending organic elegance with the captivating brilliance of tropical design.",
     category_handle: "essence",
-    thumbnail: img("essence", "verdant-dream", "main.jpg"),
+    thumbnail: img("essence", "verdant-dream", "main.webp"),
     images: productImages("essence", "verdant-dream"),
     weight: 2.66,
     features: {
@@ -334,7 +328,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Sleek rose gold threads elegantly through deep black spinel squares, creating a striking modern silhouette that balances bold sophistication with refined minimalism.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "black-harmony", "main.jpg"),
+    thumbnail: img("sparkles", "black-harmony", "main.webp"),
     images: productImages("sparkles", "black-harmony"),
     weight: 3.034,
     features: {
@@ -353,7 +347,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Curved stud earrings showcasing cascading flower motifs in gradient pink tourmaline reating an elegant botanical statement that follows the natural curve of the ear.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "blooming-charm", "main.jpg"),
+    thumbnail: img("sparkles", "blooming-charm", "main.webp"),
     images: productImages("sparkles", "blooming-charm"),
     weight: 4.7,
     features: {
@@ -372,7 +366,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Regal cuts anchor a dazzling cluster of blue and white crystals, creating an exquisite masterpiece with an icy foundation & a deep oceanic touch.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "blue-majesty", "main.jpg"),
+    thumbnail: img("sparkles", "blue-majesty", "main.webp"),
     images: productImages("sparkles", "blue-majesty"),
     weight: 6.555,
     features: {
@@ -391,7 +385,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Cascading green cubic zirconia teardrops framed in a show-stopping chandelier effect with contemporary radiance for unforgettable elegance.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "chandelier-spark", "main.jpg"),
+    thumbnail: img("sparkles", "chandelier-spark", "main.webp"),
     images: productImages("sparkles", "chandelier-spark"),
     weight: 12.5,
     features: {
@@ -410,7 +404,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A jeweled constellation orbits within polished gold hoops, blending sapphire, pink tourmaline, and emerald in a playfully sophisticated celestial dance.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "circle-celeste", "main.jpg"),
+    thumbnail: img("sparkles", "circle-celeste", "main.webp"),
     images: productImages("sparkles", "circle-celeste"),
     weight: 3.55,
     features: {
@@ -429,7 +423,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Stunning handmade three-stone drop earrings featuring a captivating gradient of turquoise blue, soft rose pink, and rich emerald green onyx framed with sparkling crystal halos for an elegant, eye-catching design.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "dazzle-drops", "main.jpg"),
+    thumbnail: img("sparkles", "dazzle-drops", "main.webp"),
     images: productImages("sparkles", "dazzle-drops"),
     weight: 16.0,
     features: {
@@ -448,7 +442,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Aqua cushion-cut topaz cascades through emerald pavé bands to luminous teardrops, creating a breathtaking gradient from sky to sea in one exquisite design.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "oceanic-ombré ", "main.jpg"),
+    thumbnail: img("sparkles", "oceanic-ombré ", "main.webp"),
     images: productImages("sparkles", "oceanic-ombré "),
     weight: 4.75,
     features: {
@@ -467,7 +461,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Luminous amethyst teardrops crowned with rose gold squares to create a gracefully graduated silhouette, merging regal purple hues with contemporary sophistication.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "purple-symphony", "main.jpg"),
+    thumbnail: img("sparkles", "purple-symphony", "main.webp"),
     images: productImages("sparkles", "purple-symphony"),
     weight: 2.368,
     features: {
@@ -486,7 +480,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Magnificent emerald-cut green crystals cascade through brilliant diamonds to royal blue teardrops, creating a breathtaking statement of jewel-toned opulence and timeless drama.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "regal-magnifique", "main.jpg"),
+    thumbnail: img("sparkles", "regal-magnifique", "main.webp"),
     images: productImages("sparkles", "regal-magnifique"),
     weight: 4.547,
     features: {
@@ -505,7 +499,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Magnificent vintage-inspired earrings featuring a dramatic bow and ribbon design, adorned with vibrant ruby-red gemstones in an elegant Art Deco style.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "vintage-shine", "main.jpg"),
+    thumbnail: img("sparkles", "vintage-shine", "main.webp"),
     images: productImages("sparkles", "vintage-shine", 3),
     weight: 10.5,
     features: {
@@ -528,7 +522,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Delicate evil eye protection locket & anklet set (can order seperately also) featuring a white mother-of-pearl eye centerpiece surrounded by sparkling crystals, accented with turquoise-blue beads on a fine silver setting.",
     category_handle: "radiance",
-    thumbnail: img("radiance", "celest-charm", "main.jpg"),
+    thumbnail: img("radiance", "celest-charm", "main.webp"),
     images: productImages("radiance", "celest-charm"),
     weight: 4.4,
     features: {
@@ -551,7 +545,7 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Feather-inspired brooch showcasing delicate curved lines adorned with brilliant crystals and crowned by a vivid blue centerpiece in a lustrous silver tone.",
     category_handle: "emblem",
-    thumbnail: img("emblem", "feather-poise", "main.jpg"),
+    thumbnail: img("emblem", "feather-poise", "main.webp"),
     images: productImages("emblem", "feather-poise"),
     weight: 16.0,
     features: {
@@ -575,8 +569,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A breathtaking pear-cut emerald suspended from a brilliant zirconia accent, set in luminous white rhodium silver chain",
     category_handle: "drops",
-    thumbnail: img("drops", "emerald-whisper", "main.png"),
-    images: productImagesPng("drops", "emerald-whisper"),
+    thumbnail: img("drops", "emerald-whisper", "main.webp"),
+    images: productImagesWebp("drops", "emerald-whisper"),
     weight: 4.51,
     features: {
       Stone: "Emerald",
@@ -586,7 +580,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.51 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMR-WHP", 50.00),
+    variants: silverPanchadhatuVariants("EMR-WHP", 36.23),
   },
   // May I collection
   {
@@ -595,9 +589,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A sleek curved gold coated curve, flanked by two zirconia accents, suspends a vivid emerald-cut gemstone at the center",
     category_handle: "drops",
-    thumbnail: img("drops", "arc-regal", "main.png"),
-    images: productImagesPng("drops", "arc-regal"),
-    weight: 4.90,
+    thumbnail: img("drops", "arc-regal", "main.webp"),
+    images: productImagesWebp("drops", "arc-regal"),
+    weight: 4.9,
     features: {
       Stone: "Green Onyx, Moissannite",
       "Stone Type": "ADD HERE",
@@ -606,7 +600,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.90 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("ARC-RGL", 50.00),
+    variants: silverPanchadhatuVariants("ARC-RGL", 62.58),
   },
   // May I collection
   {
@@ -615,8 +609,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A bold marquise-shaped pendant encrusted with pavé zirconia, edged with sharp silver points — where raw edge meets refined brilliance.",
     category_handle: "drops",
-    thumbnail: img("drops", "silver-spear", "main.png"),
-    images: productImagesPng("drops", "silver-spear"),
+    thumbnail: img("drops", "silver-spear", "main.webp"),
+    images: productImagesWebp("drops", "silver-spear"),
     weight: 1.12,
     features: {
       Stone: "Cubic Zirconia",
@@ -626,7 +620,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "1.120 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SLV-SPR", 50.00),
+    variants: silverPanchadhatuVariants("SLV-SPR", 52.7),
   },
   // May I collection
   {
@@ -635,8 +629,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Three baguette rubies set in a sleek rose gold bar, framed by delicate diamond edges — understated boldness for the modern woman.",
     category_handle: "drops",
-    thumbnail: img("drops", "ruby-slash", "main.png"),
-    images: productImagesPng("drops", "ruby-slash"),
+    thumbnail: img("drops", "ruby-slash", "main.webp"),
+    images: productImagesWebp("drops", "ruby-slash"),
     weight: 4.58,
     features: {
       Stone: "Ruby",
@@ -646,7 +640,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.58 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RBY-SLS", 50.00),
+    variants: silverPanchadhatuVariants("RBY-SLS", 39.52),
   },
   // May I collection
   {
@@ -655,8 +649,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "One baguette peridot set in a sleek rose gold bar, framed by delicate diamond edges — understated boldness for the modern woman.",
     category_handle: "drops",
-    thumbnail: img("drops", "peridot-slash", "main.png"),
-    images: productImagesPng("drops", "peridot-slash"),
+    thumbnail: img("drops", "peridot-slash", "main.webp"),
+    images: productImagesWebp("drops", "peridot-slash"),
     weight: 3.82,
     features: {
       Stone: "Peridot",
@@ -666,7 +660,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.82 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("PDT-SLS", 50.00),
+    variants: silverPanchadhatuVariants("PDT-SLS", 26.35),
   },
   // May I collection
   {
@@ -675,8 +669,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A commanding emerald-cut stone set bold in silver — unapologetic, architectural, and strikingly powerful.",
     category_handle: "drops",
-    thumbnail: img("drops", "green-vault", "main.png"),
-    images: productImagesPng("drops", "green-vault"),
+    thumbnail: img("drops", "green-vault", "main.webp"),
+    images: productImagesWebp("drops", "green-vault"),
     weight: 3.84,
     features: {
       Stone: "Emerald",
@@ -686,7 +680,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.84 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("GRN-VLT", 50.00),
+    variants: silverPanchadhatuVariants("GRN-VLT", 42.82),
   },
   // May I collection
   {
@@ -695,8 +689,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A rich oval sapphire radiating outward in a blaze of diamonds — the kind of piece that commands a room before you say a word.",
     category_handle: "drops",
-    thumbnail: img("drops", "blue-reign", "main.png"),
-    images: productImagesPng("drops", "blue-reign"),
+    thumbnail: img("drops", "blue-reign", "main.webp"),
+    images: productImagesWebp("drops", "blue-reign"),
     weight: 6.65,
     features: {
       Stone: "Blue Sapphire",
@@ -706,7 +700,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.65 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLU-RGN", 50.00),
+    variants: silverPanchadhatuVariants("BLU-RGN", 62.58),
   },
   // May I collection
   {
@@ -715,8 +709,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A brilliant diamond cradled in a fluid silver twist — pure light, captured in motion.",
     category_handle: "drops",
-    thumbnail: img("drops", "infinity-embrace", "main.png"),
-    images: productImagesPng("drops", "infinity-embrace"),
+    thumbnail: img("drops", "infinity-embrace", "main.webp"),
+    images: productImagesWebp("drops", "infinity-embrace"),
     weight: 6.17,
     features: {
       Stone: "Moissanite",
@@ -726,7 +720,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.17 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("INF-EMB", 50.00),
+    variants: silverPanchadhatuVariants("INF-EMB", 69.17),
   },
   // May I collection
   {
@@ -735,8 +729,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A single round-cut moissanite cradled in a twisted infinity setting on a delicate silver chain — simple, timeless, and quietly stunning.",
     category_handle: "drops",
-    thumbnail: img("drops", "infinity-embrace", "main.png"),
-    images: productImagesPng("drops", "infinity-embrace"),
+    thumbnail: img("drops", "infinity-embrace", "main.webp"),
+    images: productImagesWebp("drops", "infinity-embrace"),
     weight: 5.86,
     features: {
       Stone: "Moissanite",
@@ -746,7 +740,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "5.86 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("INF-EMB-PND", 50.00),
+    variants: silverPanchadhatuVariants("INF-EMB-PND", 69.17),
   },
   // May I collection
   {
@@ -755,9 +749,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A playful trail of multicolored gemstones drifting across silver — effortlessly whimsical, like wildflowers strung on light.",
     category_handle: "drops",
-    thumbnail: img("drops", "scattered-bloom", "main.png"),
-    images: productImagesPng("drops", "scattered-bloom"),
-    weight: 10.50,
+    thumbnail: img("drops", "scattered-bloom", "main.webp"),
+    images: productImagesWebp("drops", "scattered-bloom"),
+    weight: 10.5,
     features: {
       Stone: "Tourmaline",
       "Stone Type": "ADD HERE",
@@ -766,7 +760,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "10.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SCT-BLM", 50.00),
+    variants: silverPanchadhatuVariants("SCT-BLM", 102.1),
   },
   // May I collection
   {
@@ -775,8 +769,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A breathtaking pear-cut blue sapphire suspended from a brilliant zirconia accent, set in luminous white rhodium silver chain",
     category_handle: "drops",
-    thumbnail: img("drops", "sapphire-whisper", "main.png"),
-    images: productImagesPng("drops", "sapphire-whisper"),
+    thumbnail: img("drops", "sapphire-whisper", "main.webp"),
+    images: productImagesWebp("drops", "sapphire-whisper"),
     weight: 4.47,
     features: {
       Stone: "Blue Sapphire",
@@ -786,7 +780,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.47 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SAP-WHP", 50.00),
+    variants: silverPanchadhatuVariants("SAP-WHP", 36.23),
   },
   // May I collection
   {
@@ -795,8 +789,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A pear-cut ruby wrapped in a full zirconia halo, suspended from a marquise floral cluster — dramatic, opulent, and red-carpet ready.",
     category_handle: "drops",
-    thumbnail: img("drops", "velvet-ruby", "main.png"),
-    images: productImagesPng("drops", "velvet-ruby"),
+    thumbnail: img("drops", "velvet-ruby", "main.webp"),
+    images: productImagesWebp("drops", "velvet-ruby"),
     weight: 9.06,
     features: {
       Stone: "Ruby",
@@ -806,7 +800,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "9.06 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VLV-RBY", 50.00),
+    variants: silverPanchadhatuVariants("VLV-RBY", 82.34),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -819,8 +813,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A lush oval emerald haloed in zirconia, with a braided silver bracelet — like luxury wrapped around your wrist.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "emerald-embrace", "main.png"),
-    images: productImagesPng("nexus", "emerald-embrace"),
+    thumbnail: img("nexus", "emerald-embrace", "main.webp"),
+    images: productImagesWebp("nexus", "emerald-embrace"),
     weight: 12.67,
     features: {
       Stone: "Emerald",
@@ -830,7 +824,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.67 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMR-EMB", 50.00),
+    variants: silverPanchadhatuVariants("EMR-EMB", 102.1),
   },
   // May I collection
   {
@@ -839,8 +833,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A bold square-cut ruby locked in gold on a sleek gold coated chain — structured desire, wrapped around your wrist.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "crimson-tale", "main.png"),
-    images: productImagesPng("nexus", "crimson-tale"),
+    thumbnail: img("nexus", "crimson-tale", "main.webp"),
+    images: productImagesWebp("nexus", "crimson-tale"),
     weight: 10.41,
     features: {
       Stone: "Crystal",
@@ -850,7 +844,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "10.41 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CRM-TLE", 50.00),
+    variants: silverPanchadhatuVariants("CRM-TLE", 93.87),
   },
   // May I collection
   {
@@ -859,8 +853,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Minimalist gold open-bangle with a single bezel-set square green onyx stone wrapped in gold e-coating — clean, confident, and effortlessly chic.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "timeless-cuff", "main.png"),
-    images: productImagesPng("nexus", "timeless-cuff"),
+    thumbnail: img("nexus", "timeless-cuff", "main.webp"),
+    images: productImagesWebp("nexus", "timeless-cuff"),
     weight: 10.41,
     features: {
       Stone: "Green Onyx",
@@ -870,7 +864,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "10.41 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("TML-CFF", 50.00),
+    variants: silverPanchadhatuVariants("TML-CFF", 95.51),
   },
   // May I collection
   {
@@ -879,8 +873,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A stacked pair of silver bangles alternating oval sapphires and pavé zirconia — rich, regal, and made to be worn together.",
     category_handle: "nexus",
-    thumbnail: img("nexus", "sapphire-royale", "main.png"),
-    images: productImagesPng("nexus", "sapphire-royale"),
+    thumbnail: img("nexus", "sapphire-royale", "main.webp"),
+    images: productImagesWebp("nexus", "sapphire-royale"),
     weight: 24.13,
     features: {
       Stone: "Kyanite",
@@ -890,7 +884,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "24.13 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SAP-RYL", 50.00),
+    variants: silverPanchadhatuVariants("SAP-RYL", 263.49),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -903,9 +897,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Two emerald-cut citrines dripping from a zirconia, suspended from silver lever backs — warm, bold, and dangerously gorgeous.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "amber-drop", "main.png"),
-    images: productImagesPng("sparkles", "amber-drop"),
-    weight: 2.80,
+    thumbnail: img("sparkles", "amber-drop", "main.webp"),
+    images: productImagesWebp("sparkles", "amber-drop"),
+    weight: 2.8,
     features: {
       Stone: "Citrine",
       "Stone Type": "ADD HERE",
@@ -914,7 +908,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.80 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("AMB-DRP", 50.00),
+    variants: silverPanchadhatuVariants("AMB-DRP", 26.35),
   },
   // May I collection
   {
@@ -923,9 +917,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Gold-toned chandelier earrings with ruby red teardrop stones and zirconia accents in a cascading drop design – evergreen and sparkling",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "chandelier-touch", "main.png"),
-    images: productImagesPng("sparkles", "chandelier-touch"),
-    weight: 12.50,
+    thumbnail: img("sparkles", "chandelier-touch", "main.webp"),
+    images: productImagesWebp("sparkles", "chandelier-touch"),
+    weight: 12.5,
     features: {
       Stone: "Ruby",
       "Stone Type": "ADD HERE",
@@ -934,7 +928,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CHD-TCH", 50.00),
+    variants: silverPanchadhatuVariants("CHD-TCH", 141.62),
   },
   // May I collection
   {
@@ -943,9 +937,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Gold coated hoops with pavé-set crystals and a dangling round-cut CZ stone for effortless everyday elegance.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "solitaire-drops", "main.png"),
-    images: productImagesPng("sparkles", "solitaire-drops"),
-    weight: 3.50,
+    thumbnail: img("sparkles", "solitaire-drops", "main.webp"),
+    images: productImagesWebp("sparkles", "solitaire-drops"),
+    weight: 3.5,
     features: {
       Stone: "Zirconia",
       "Stone Type": "ADD HERE",
@@ -954,7 +948,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SLT-DRP", 50.00),
+    variants: silverPanchadhatuVariants("SLT-DRP", 29.64),
   },
   // May I collection
   {
@@ -963,8 +957,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Chandelier drop earrings layering London & Sky Blue Topaz cuts of teal stones in a silver pavé setting — perfect for making a statement.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "mosaic-blue", "main.png"),
-    images: productImagesPng("sparkles", "mosaic-blue"),
+    thumbnail: img("sparkles", "mosaic-blue", "main.webp"),
+    images: productImagesWebp("sparkles", "mosaic-blue"),
     weight: 15.97,
     features: {
       Stone: "London Blue Topaz, Sky Blue Topaz",
@@ -974,7 +968,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "15.97 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("MSC-BLU", 50.00),
+    variants: silverPanchadhatuVariants("MSC-BLU", 144.92),
   },
   // May I collection
   {
@@ -983,8 +977,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Rich oval emeralds wrapped in a full zirconia halo, with marquise and pear-cut stones cascading below — understated luxury at its finest.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "verde-luxe", "main.png"),
-    images: productImagesPng("sparkles", "verde-luxe"),
+    thumbnail: img("sparkles", "verde-luxe", "main.webp"),
+    images: productImagesWebp("sparkles", "verde-luxe"),
     weight: 6.93,
     features: {
       Stone: "Emerald",
@@ -994,7 +988,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.93 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VRD-LXE", 50.00),
+    variants: silverPanchadhatuVariants("VRD-LXE", 79.05),
   },
   // May I collection
   {
@@ -1003,9 +997,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A bold emerald-cut navy sapphire crowned in gold plating, dropping into a trio of crystal teardrops for a polished, evening-ready finish.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "midnight-cluster", "main.png"),
-    images: productImagesPng("sparkles", "midnight-cluster"),
-    weight: 5.50,
+    thumbnail: img("sparkles", "midnight-cluster", "main.webp"),
+    images: productImagesWebp("sparkles", "midnight-cluster"),
+    weight: 5.5,
     features: {
       Stone: "Blue Sapphire",
       "Stone Type": "ADD HERE",
@@ -1014,7 +1008,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "5.50 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("MID-CLS", 50.00),
+    variants: silverPanchadhatuVariants("MID-CLS", 62.58),
   },
   // May I collection
   {
@@ -1023,8 +1017,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Delicate silver drop earrings with cushion and teardrop peridot stones linked by a trail of zirconia accents — effortlessly fresh and refined.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "olive-dangle", "main.png"),
-    images: productImagesPng("sparkles", "olive-dangle"),
+    thumbnail: img("sparkles", "olive-dangle", "main.webp"),
+    images: productImagesWebp("sparkles", "olive-dangle"),
     weight: 6.02,
     features: {
       Stone: "Peridot",
@@ -1034,7 +1028,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.02 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("OLV-DNG", 50.00),
+    variants: silverPanchadhatuVariants("OLV-DNG", 71.14),
   },
   // May I collection
   {
@@ -1043,9 +1037,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Gold bezel-set emerald-cut crystals arranged in a geometric cluster, finished with round CZ accents — bold structure meets vintage glamour.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "crystal-cluster", "main.png"),
-    images: productImagesPng("sparkles", "crystal-cluster"),
-    weight: 9.00,
+    thumbnail: img("sparkles", "crystal-cluster", "main.webp"),
+    images: productImagesWebp("sparkles", "crystal-cluster"),
+    weight: 9.0,
     features: {
       Stone: "Moissanite, Polki",
       "Stone Type": "ADD HERE",
@@ -1054,7 +1048,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "9.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CRY-CLS", 50.00),
+    variants: silverPanchadhatuVariants("CRY-CLS", 62.58),
   },
   // May I collection
   {
@@ -1063,8 +1057,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Delicate silver teardrop earrings with emerald stones connected by zirconia-cut links on a sleek silver drop — effortlessly elegant.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "emerald-dangle", "main.png"),
-    images: productImagesPng("sparkles", "emerald-dangle"),
+    thumbnail: img("sparkles", "emerald-dangle", "main.webp"),
+    images: productImagesWebp("sparkles", "emerald-dangle"),
     weight: 6.01,
     features: {
       Stone: "Emerald",
@@ -1074,7 +1068,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.01 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMR-DNG", 50.00),
+    variants: silverPanchadhatuVariants("EMR-DNG", 71.14),
   },
   // May I collection
   {
@@ -1083,8 +1077,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Trillion-cut citrine studs topped with a trio of zirconia accents — warm, radiant, and polished enough for any occasion.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "sunset-stud", "main.png"),
-    images: productImagesPng("sparkles", "sunset-stud"),
+    thumbnail: img("sparkles", "sunset-stud", "main.webp"),
+    images: productImagesWebp("sparkles", "sunset-stud"),
     weight: 1.16,
     features: {
       Stone: "Citrine",
@@ -1094,7 +1088,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "1.16 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SUN-STD", 50.00),
+    variants: silverPanchadhatuVariants("SUN-STD", 16.47),
   },
   // May I collection
   {
@@ -1103,8 +1097,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Sleek polished silver ball drops on a simple hook — minimal, modern, and endlessly wearable.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "luna-drops", "main.png"),
-    images: productImagesPng("sparkles", "luna-drops"),
+    thumbnail: img("sparkles", "luna-drops", "main.webp"),
+    images: productImagesWebp("sparkles", "luna-drops"),
     weight: 3.25,
     features: {
       Stone: "ADD HERE",
@@ -1114,7 +1108,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.25 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("LUN-DRP", 50.00),
+    variants: silverPanchadhatuVariants("LUN-DRP", 23.06),
   },
   // May I collection
   {
@@ -1123,8 +1117,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Blush pink teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "medallion-rosette", "main.png"),
-    images: productImagesPng("sparkles", "medallion-rosette"),
+    thumbnail: img("sparkles", "medallion-rosette", "main.webp"),
+    images: productImagesWebp("sparkles", "medallion-rosette"),
     weight: 11.53,
     features: {
       Stone: "Rose Quartz",
@@ -1134,7 +1128,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "11.53 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("MDL-RST", 50.00),
+    variants: silverPanchadhatuVariants("MDL-RST", 123.84),
   },
   // May I collection
   {
@@ -1143,8 +1137,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Trillion-cut emerald studs topped with a trio of zirconia accents — warm, radiant, and polished enough for any occasion.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "emerald-stud", "main.png"),
-    images: productImagesPng("sparkles", "emerald-stud"),
+    thumbnail: img("sparkles", "emerald-stud", "main.webp"),
+    images: productImagesWebp("sparkles", "emerald-stud"),
     weight: 1.01,
     features: {
       Stone: "Emerald",
@@ -1154,7 +1148,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "1.01 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMR-STD", 50.00),
+    variants: silverPanchadhatuVariants("EMR-STD", 16.47),
   },
   // May I collection
   {
@@ -1163,8 +1157,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Blue sapphire teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "medallion-sapphire", "main.png"),
-    images: productImagesPng("sparkles", "medallion-sapphire"),
+    thumbnail: img("sparkles", "medallion-sapphire", "main.webp"),
+    images: productImagesWebp("sparkles", "medallion-sapphire"),
     weight: 10.73,
     features: {
       Stone: "Blue Sapphire",
@@ -1174,7 +1168,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "10.73 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("MDL-SAP", 50.00),
+    variants: silverPanchadhatuVariants("MDL-SAP", 123.84),
   },
   // May I collection
   {
@@ -1183,8 +1177,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Emerald teardrop studs blooming into an intricate pavé-set floral disc — feminine, statement-worthy, and undeniably elegant.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "medallion-emerald", "main.png"),
-    images: productImagesPng("sparkles", "medallion-emerald"),
+    thumbnail: img("sparkles", "medallion-emerald", "main.webp"),
+    images: productImagesWebp("sparkles", "medallion-emerald"),
     weight: 11.16,
     features: {
       Stone: "Emerald",
@@ -1194,7 +1188,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "11.16 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("MDL-EMR", 50.00),
+    variants: silverPanchadhatuVariants("MDL-EMR", 123.84),
   },
   // May I collection
   {
@@ -1203,8 +1197,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Two emerald-cut rose quartz stones dripping from a zirconia, suspended from silver lever backs — warm, bold, and dangerously gorgeous.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "rose-drop", "main.png"),
-    images: productImagesPng("sparkles", "rose-drop"),
+    thumbnail: img("sparkles", "rose-drop", "main.webp"),
+    images: productImagesWebp("sparkles", "rose-drop"),
     weight: 2.93,
     features: {
       Stone: "Rose Quartz",
@@ -1214,7 +1208,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.93 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RSE-DRP", 50.00),
+    variants: silverPanchadhatuVariants("RSE-DRP", 29.64),
   },
   // May I collection
   {
@@ -1223,8 +1217,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Delicate silver teardrop earrings with rose quartz stones connected by zirconia-cut links on a sleek silver drop — effortlessly elegant.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "rose-dangle", "main.png"),
-    images: productImagesPng("sparkles", "rose-dangle"),
+    thumbnail: img("sparkles", "rose-dangle", "main.webp"),
+    images: productImagesWebp("sparkles", "rose-dangle"),
     weight: 5.94,
     features: {
       Stone: "Rose Quartz",
@@ -1234,7 +1228,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "5.94 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RSE-DNG", 50.00),
+    variants: silverPanchadhatuVariants("RSE-DNG", 71.14),
   },
   // May I collection
   {
@@ -1243,8 +1237,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A pear-cut ruby wrapped in a full zirconia halo, suspended from a marquise floral cluster — dramatic, opulent, and red-carpet ready.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "velvet-ruby", "main.png"),
-    images: productImagesPng("sparkles", "velvet-ruby"),
+    thumbnail: img("sparkles", "velvet-ruby", "main.webp"),
+    images: productImagesWebp("sparkles", "velvet-ruby"),
     weight: 9.06,
     features: {
       Stone: "Ruby",
@@ -1254,7 +1248,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "9.06 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VLV-RBY-ER", 50.00),
+    variants: silverPanchadhatuVariants("VLV-RBY-ER", 82.34),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1267,8 +1261,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A trail of round zirconia flows down a delicate silver chain, leading the eye to a bold emerald-cut green stone — simple, striking, and impossible to ignore.",
     category_handle: "drops",
-    thumbnail: img("drops", "green-envy", "main.png"),
-    images: productImagesPng("drops", "green-envy"),
+    thumbnail: img("drops", "green-envy", "main.webp"),
+    images: productImagesWebp("drops", "green-envy"),
     weight: 6.49,
     features: {
       Stone: "Emerald",
@@ -1278,7 +1272,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.49 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("GRN-ENV", 50.00),
+    variants: silverPanchadhatuVariants("GRN-ENV", 62.58),
   },
   // May II collection
   {
@@ -1287,8 +1281,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A trail of round zirconia flows down a delicate silver chain, leading the eye to a bold emerald-cut ruby — simple, striking, and impossible to ignore.",
     category_handle: "drops",
-    thumbnail: img("drops", "ruby-envy", "main.png"),
-    images: productImagesPng("drops", "ruby-envy"),
+    thumbnail: img("drops", "ruby-envy", "main.webp"),
+    images: productImagesWebp("drops", "ruby-envy"),
     weight: 6.63,
     features: {
       Stone: "Ruby Sapphire",
@@ -1298,7 +1292,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.63 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RBY-ENV", 50.00),
+    variants: silverPanchadhatuVariants("RBY-ENV", 62.58),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1311,8 +1305,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A deep red oval garnet sits at the center of a glittering zirconia halo, set in warm gold with a beautifully tapered split-band.",
     category_handle: "essence",
-    thumbnail: img("essence", "scarlet-garnet", "main.png"),
-    images: productImagesPng("essence", "scarlet-garnet"),
+    thumbnail: img("essence", "scarlet-garnet", "main.webp"),
+    images: productImagesWebp("essence", "scarlet-garnet"),
     weight: 2.02,
     features: {
       Stone: "Garnet",
@@ -1322,7 +1316,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.02 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("SCL-GRN", 50.00),
+    variants: silverPanchadhatuVariants("SCL-GRN", 36.23),
   },
   // May II collection
   {
@@ -1331,8 +1325,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A vivid trillion-cut emerald sits at the heart of a bold double halo — sparkling zirconia ringed by deep green emeralds — all set in a striking silver-toned band.",
     category_handle: "essence",
-    thumbnail: img("essence", "verdant-trillion", "main.png"),
-    images: productImagesPng("essence", "verdant-trillion"),
+    thumbnail: img("essence", "verdant-trillion", "main.webp"),
+    images: productImagesWebp("essence", "verdant-trillion"),
     weight: 6.08,
     features: {
       Stone: "Emerald",
@@ -1342,7 +1336,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.08 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VRD-TRL", 50.00),
+    variants: silverPanchadhatuVariants("VRD-TRL", 55.99),
   },
   // May II collection
   {
@@ -1351,8 +1345,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A sleek marquise-cut green onyx stone framed in gold beading pairs effortlessly with zirconia outline companion ring, made to be worn together or apart.",
     category_handle: "essence",
-    thumbnail: img("essence", "golden-marquise", "main.png"),
-    images: productImagesPng("essence", "golden-marquise"),
+    thumbnail: img("essence", "golden-marquise", "main.webp"),
+    images: productImagesWebp("essence", "golden-marquise"),
     weight: 3.75,
     features: {
       Stone: "Green Onyx",
@@ -1362,7 +1356,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.75 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("GLD-MRQ", 50.00),
+    variants: silverPanchadhatuVariants("GLD-MRQ", 36.23),
   },
   // May II collection
   {
@@ -1371,8 +1365,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A vivid trillion-cut ruby sits at the heart of a bold zirconia halo — sparkling zirconia ringed by deep ruby pearls — all set in a striking silver-toned band.",
     category_handle: "essence",
-    thumbnail: img("essence", "ruby-trillion", "main.png"),
-    images: productImagesPng("essence", "ruby-trillion"),
+    thumbnail: img("essence", "ruby-trillion", "main.webp"),
+    images: productImagesWebp("essence", "ruby-trillion"),
     weight: 6.27,
     features: {
       Stone: "Ruby",
@@ -1382,7 +1376,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.27 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RBY-TRL", 50.00),
+    variants: silverPanchadhatuVariants("RBY-TRL", 55.99),
   },
   // May II collection
   {
@@ -1391,8 +1385,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A deep sapphire blue center stone flanked by two sky blue topaz ovals, all set in a clean silver band for a cool, effortlessly elegant look.",
     category_handle: "essence",
-    thumbnail: img("essence", "blue-horizon", "main.png"),
-    images: productImagesPng("essence", "blue-horizon"),
+    thumbnail: img("essence", "blue-horizon", "main.webp"),
+    images: productImagesWebp("essence", "blue-horizon"),
     weight: 3.77,
     features: {
       Stone: "Sapphire",
@@ -1402,7 +1396,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.77 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLU-HRZ", 50.00),
+    variants: silverPanchadhatuVariants("BLU-HRZ", 36.23),
   },
   // May II collection
   {
@@ -1411,8 +1405,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A deep ruby center stone flanked by two rose quartz ovals, all set in a clean silver band for a cool, effortlessly elegant look.",
     category_handle: "essence",
-    thumbnail: img("essence", "red-horizon", "main.png"),
-    images: productImagesPng("essence", "red-horizon"),
+    thumbnail: img("essence", "red-horizon", "main.webp"),
+    images: productImagesWebp("essence", "red-horizon"),
     weight: 3.54,
     features: {
       Stone: "Ruby",
@@ -1422,7 +1416,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "3.54 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RED-HRZ", 50.00),
+    variants: silverPanchadhatuVariants("RED-HRZ", 36.23),
   },
   // May II collection
   {
@@ -1431,8 +1425,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A vivid trillion-cut tanzanite sits at the heart of a bold zirconia halo — sparkling zirconia ringed by blue pearls — all set in a striking silver-toned band.",
     category_handle: "essence",
-    thumbnail: img("essence", "tanzanite-trillion", "main.png"),
-    images: productImagesPng("essence", "tanzanite-trillion"),
+    thumbnail: img("essence", "tanzanite-trillion", "main.webp"),
+    images: productImagesWebp("essence", "tanzanite-trillion"),
     weight: 6.39,
     features: {
       Stone: "Tanzanite",
@@ -1442,7 +1436,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.39 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("TZN-TRL", 50.00),
+    variants: silverPanchadhatuVariants("TZN-TRL", 59.28),
   },
   // May II collection
   {
@@ -1451,9 +1445,9 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Three oval-cut garnets nestled in glittering cubic zirconia halos, set in sterling silver for a timeless, regal elegance.",
     category_handle: "essence",
-    thumbnail: img("essence", "garnet-garnish", "main.png"),
-    images: productImagesPng("essence", "garnet-garnish"),
-    weight: 4.00,
+    thumbnail: img("essence", "garnet-garnish", "main.webp"),
+    images: productImagesWebp("essence", "garnet-garnish"),
+    weight: 4.0,
     features: {
       Stone: "Garnet",
       "Stone Type": "ADD HERE",
@@ -1462,7 +1456,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.00 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("GRN-GRN", 50.00),
+    variants: silverPanchadhatuVariants("GRN-GRN", 46.11),
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1475,8 +1469,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A zirconia flower cluster cascades into a sparkling baguette drop, finishing with a rich ruby teardrop wrapped in a halo — effortlessly dramatic.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "ruby-reverie", "main.png"),
-    images: productImagesPng("sparkles", "ruby-reverie"),
+    thumbnail: img("sparkles", "ruby-reverie", "main.webp"),
+    images: productImagesWebp("sparkles", "ruby-reverie"),
     weight: 6.53,
     features: {
       Stone: "Ruby",
@@ -1486,7 +1480,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "6.53 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RBY-RVR", 50.00),
+    variants: silverPanchadhatuVariants("RBY-RVR", 36.23),
   },
   // May II collection
   {
@@ -1495,8 +1489,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A pear-cut zirconia halo stud flows into a delicate baguette, dropping into a bold ruby teardrop — clean, linear, and quietly show-stopping.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "crimson-descent", "main.png"),
-    images: productImagesPng("sparkles", "crimson-descent"),
+    thumbnail: img("sparkles", "crimson-descent", "main.webp"),
+    images: productImagesWebp("sparkles", "crimson-descent"),
     weight: 12.66,
     features: {
       Stone: "Ruby",
@@ -1506,7 +1500,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "12.66 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("CRM-DSC", 50.00),
+    variants: silverPanchadhatuVariants("CRM-DSC", 98.81),
   },
   // May II collection
   {
@@ -1515,8 +1509,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A zirconia-framed emerald-cut stud drops into an open teardrop halo cradling a lush green pear — bold geometry with a touch of old-world glamour.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "jade-and-ice", "main.png"),
-    images: productImagesPng("sparkles", "jade-and-ice"),
+    thumbnail: img("sparkles", "jade-and-ice", "main.webp"),
+    images: productImagesWebp("sparkles", "jade-and-ice"),
     weight: 8.39,
     features: {
       Stone: "Emerald",
@@ -1526,7 +1520,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "8.39 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("JDE-ICE", 50.00),
+    variants: silverPanchadhatuVariants("JDE-ICE", 82.34),
   },
   // May II collection
   {
@@ -1535,8 +1529,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Two long zirconia studded rectangle drops swing into a soft blush pink teardrop — sleek, modern, and just the right amount of bold.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "pink-oscillate", "main.png"),
-    images: productImagesPng("sparkles", "pink-oscillate"),
+    thumbnail: img("sparkles", "pink-oscillate", "main.webp"),
+    images: productImagesWebp("sparkles", "pink-oscillate"),
     weight: 18.35,
     features: {
       Stone: "Rose Quartz",
@@ -1546,7 +1540,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "18.35 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("PNK-OSC", 50.00),
+    variants: silverPanchadhatuVariants("PNK-OSC", 128.45),
   },
   // May II collection
   {
@@ -1555,8 +1549,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Two ruby halos — one stacked above the other — each bursting with a sunburst of zirconia, like a flower caught mid-bloom.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "ruby-bloom", "main.png"),
-    images: productImagesPng("sparkles", "ruby-bloom"),
+    thumbnail: img("sparkles", "ruby-bloom", "main.webp"),
+    images: productImagesWebp("sparkles", "ruby-bloom"),
     weight: 8.26,
     features: {
       Stone: "Ruby",
@@ -1566,7 +1560,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "8.26 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RBY-BLM", 50.00),
+    variants: silverPanchadhatuVariants("RBY-BLM", 71.14),
   },
   // May II collection
   {
@@ -1575,8 +1569,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A lush oval deep forest emerald ringed by a bold burst of zirconia petals — like a sunflower, but make it priceless.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "emerald-sun", "main.png"),
-    images: productImagesPng("sparkles", "emerald-sun"),
+    thumbnail: img("sparkles", "emerald-sun", "main.webp"),
+    images: productImagesWebp("sparkles", "emerald-sun"),
     weight: 4.81,
     features: {
       Stone: "Emerald",
@@ -1586,7 +1580,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.81 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMR-SUN", 50.00),
+    variants: silverPanchadhatuVariants("EMR-SUN", 51.38),
   },
   // May II collection
   {
@@ -1595,8 +1589,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Two long zirconia studded rectangle drops swing into a soft blush blue teardrop — sleek, modern, and just the right amount of bold.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "blue-oscillate", "main.png"),
-    images: productImagesPng("sparkles", "blue-oscillate"),
+    thumbnail: img("sparkles", "blue-oscillate", "main.webp"),
+    images: productImagesWebp("sparkles", "blue-oscillate"),
     weight: 18.51,
     features: {
       Stone: "London Blue Topaz",
@@ -1606,7 +1600,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "18.51 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("BLU-OSC", 50.00),
+    variants: silverPanchadhatuVariants("BLU-OSC", 128.45),
   },
   // May II collection
   {
@@ -1615,8 +1609,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "A clean emerald-cut ruby hangs from a simple zirconia cluster on a classic lever-back — no fuss, just a deep red stone that does all the talking.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "red-square", "main.png"),
-    images: productImagesPng("sparkles", "red-square"),
+    thumbnail: img("sparkles", "red-square", "main.webp"),
+    images: productImagesWebp("sparkles", "red-square"),
     weight: 2.86,
     features: {
       Stone: "Ruby",
@@ -1626,7 +1620,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "2.86 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("RED-SQR", 50.00),
+    variants: silverPanchadhatuVariants("RED-SQR", 29.64),
   },
   // May II collection
   {
@@ -1635,8 +1629,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Oval emerald centre embraced by a double halo of sparkling zirconia and vivid green emerald rounds, set in lustrous sterling silver.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "empress-green", "main.png"),
-    images: productImagesPng("sparkles", "empress-green"),
+    thumbnail: img("sparkles", "empress-green", "main.webp"),
+    images: productImagesWebp("sparkles", "empress-green"),
     weight: 7.13,
     features: {
       Stone: "Emerald",
@@ -1646,7 +1640,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "7.13 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("EMP-GRN", 50.00),
+    variants: silverPanchadhatuVariants("EMP-GRN", 73.78),
   },
   // May II collection
   {
@@ -1655,8 +1649,8 @@ const PRODUCTS: ProductSeed[] = [
     description:
       "Cushion-cut emeralds draped in a single halo of brilliant zirconia rounds — where deep ocean green meets icy white fire.",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "velvet-verde", "main.png"),
-    images: productImagesPng("sparkles", "velvet-verde"),
+    thumbnail: img("sparkles", "velvet-verde", "main.webp"),
+    images: productImagesWebp("sparkles", "velvet-verde"),
     weight: 4.62,
     features: {
       Stone: "Emerald",
@@ -1666,7 +1660,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "4.62 gm",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VLV-VRD", 50.00),
+    variants: silverPanchadhatuVariants("VLV-VRD", 49.4),
   },
   // May II collection
   {
@@ -1674,9 +1668,9 @@ const PRODUCTS: ProductSeed[] = [
     title: "Verdant Horizon",
     description: "ADD HERE",
     category_handle: "sparkles",
-    thumbnail: img("sparkles", "verdant-horizon", "main.png"),
-    images: productImagesPng("sparkles", "verdant-horizon"),
-    weight: null,
+    thumbnail: img("sparkles", "verdant-horizon", "main.webp"),
+    images: productImagesWebp("sparkles", "verdant-horizon"),
+    weight: 0,
     features: {
       Stone: "ADD HERE",
       "Stone Type": "ADD HERE",
@@ -1685,7 +1679,7 @@ const PRODUCTS: ProductSeed[] = [
       "Silver Weight": "ADD HERE",
     },
     options: [MATERIAL_OPTION],
-    variants: silverPanchadhatuVariants("VRD-HRZ", 50.00),
+    variants: silverPanchadhatuVariants("VRD-HRZ", 50.0),
   },
 ];
 

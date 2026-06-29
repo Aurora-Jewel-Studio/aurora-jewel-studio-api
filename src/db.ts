@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
+dotenv.config({ path: ".env.local", override: true });
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -28,6 +29,8 @@ export async function initDatabase() {
         phone VARCHAR(50),
         budget VARCHAR(50),
         description TEXT NOT NULL,
+        inquiry_type VARCHAR(50) DEFAULT 'Custom',
+        reference_image TEXT,
         status VARCHAR(30) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT NOW()
       );
@@ -53,7 +56,7 @@ export async function initDatabase() {
         customer_email VARCHAR(255) NOT NULL,
         customer_phone VARCHAR(50),
         shipping_address TEXT,
-        total_amount INTEGER NOT NULL,
+        total_amount NUMERIC(10,2) NOT NULL,
         currency VARCHAR(10) DEFAULT 'npr',
         payment_method VARCHAR(50),
         payment_status VARCHAR(30) DEFAULT 'pending',
@@ -87,6 +90,17 @@ export async function initDatabase() {
       ALTER TABLE products 
       ADD COLUMN IF NOT EXISTS weight NUMERIC,
       ADD COLUMN IF NOT EXISTS features JSONB DEFAULT '{}';
+    `);
+
+    await client.query(`
+      ALTER TABLE bespoke_requests
+      ADD COLUMN IF NOT EXISTS inquiry_type VARCHAR(50) DEFAULT 'Custom',
+      ADD COLUMN IF NOT EXISTS reference_image TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ALTER COLUMN total_amount TYPE NUMERIC(10,2);
     `);
 
     // Migrate price column from INTEGER to NUMERIC if needed

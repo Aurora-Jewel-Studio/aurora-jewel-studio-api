@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.ADMIN_JWT_SECRET || "dev-secret-change-me";
+function getJwtSecret() {
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("ADMIN_JWT_SECRET must be set to at least 32 characters.");
+  }
+  return secret;
+}
 
 export interface AuthRequest extends Request {
   adminEmail?: string;
@@ -26,7 +32,7 @@ export function requireAdmin(
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { email: string };
     req.adminEmail = decoded.email;
     next();
   } catch {
@@ -39,5 +45,5 @@ export function requireAdmin(
  * Generate a JWT token for an admin user.
  */
 export function generateAdminToken(email: string): string {
-  return jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ email }, getJwtSecret(), { expiresIn: "7d" });
 }
