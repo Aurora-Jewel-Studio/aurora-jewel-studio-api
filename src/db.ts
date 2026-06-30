@@ -4,11 +4,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 dotenv.config({ path: ".env.local", override: true });
 
-const isProduction = process.env.NODE_ENV === "production";
-
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  ssl: { rejectUnauthorized: false }, // Always allow SSL for cloud databases
+  connectionTimeoutMillis: 10000,
 });
 
 export const query = (text: string, params?: any[]) => pool.query(text, params);
@@ -18,9 +17,10 @@ export const query = (text: string, params?: any[]) => pool.query(text, params);
  * Safe to call multiple times — uses IF NOT EXISTS.
  */
 export async function initDatabase() {
-  const client = await pool.connect();
   try {
-    await client.query(`
+    const client = await pool.connect();
+    try {
+      await client.query(`
       CREATE TABLE IF NOT EXISTS bespoke_requests (
         id SERIAL PRIMARY KEY,
         first_name VARCHAR(100) NOT NULL,
@@ -110,8 +110,13 @@ export async function initDatabase() {
     `);
 
     console.log("✅ Database tables initialized");
-  } finally {
-    client.release();
+    } finally {
+      client.release();
+    }
+  } catch (error: any) {
+    console.error("⚠️ Non-fatal: Database initialization script failed or timed out:", error.message);
+    // We swallow the error so that the server can still boot and serve requests.
+    // In serverless environments, connection resets (ECONNRESET) during heavy DDL scripts are common.
   }
 }
 
