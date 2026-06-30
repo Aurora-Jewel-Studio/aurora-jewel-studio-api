@@ -60,12 +60,34 @@ async function markOrderPaid(orderId: number, paymentMethod: string, paymentRefe
   );
 }
 
+function getPayPalConfig() {
+  const isLive = process.env.PAYPAL_ENV === "live";
+  const clientId =
+    process.env.PAYPAL_CLIENT_ID ||
+    process.env.PAYPAL_SANDBOX_CLIENT_ID ||
+    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const clientSecret =
+    process.env.PAYPAL_CLIENT_SECRET ||
+    process.env.PAYPAL_SANDBOX_CLIENT_SECRET ||
+    process.env.PAYPAL_SECRET;
+
+  return {
+    clientId,
+    clientSecret,
+    baseUrl: isLive ? PAYPAL_LIVE_API : PAYPAL_SANDBOX_API,
+    env: isLive ? "live" : "sandbox",
+    missing: [
+      !clientId ? "PAYPAL_CLIENT_ID or PAYPAL_SANDBOX_CLIENT_ID" : null,
+      !clientSecret ? "PAYPAL_CLIENT_SECRET or PAYPAL_SANDBOX_CLIENT_SECRET" : null,
+    ].filter(Boolean),
+  };
+}
+
 async function getPayPalAccessToken() {
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+  const config = getPayPalConfig();
+  const { clientId, clientSecret, baseUrl } = config;
   if (!clientId || !clientSecret) return null;
 
-  const baseUrl = process.env.PAYPAL_ENV === "live" ? PAYPAL_LIVE_API : PAYPAL_SANDBOX_API;
   const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: "POST",
     headers: {
@@ -81,7 +103,7 @@ async function getPayPalAccessToken() {
   }
 
   const data = (await response.json()) as { access_token: string };
-  return { accessToken: data.access_token, baseUrl };
+  return { accessToken: data.access_token, baseUrl, env: config.env };
 }
 
 function getPayPalApprovalUrl(data: any) {
@@ -259,7 +281,10 @@ router.post("/paypal/create-order", async (req, res) => {
     const paypal = await getPayPalAccessToken();
 
     if (!paypal) {
-      res.status(503).json({ error: "PayPal payment is not configured." });
+      res.status(503).json({
+        error: "PayPal payment is not configured.",
+        missing: getPayPalConfig().missing,
+      });
       return;
     }
 
@@ -330,7 +355,10 @@ router.post("/paypal/capture-order", async (req, res) => {
     const paypal = await getPayPalAccessToken();
 
     if (!paypal) {
-      res.status(503).json({ error: "PayPal payment is not configured." });
+      res.status(503).json({
+        error: "PayPal payment is not configured.",
+        missing: getPayPalConfig().missing,
+      });
       return;
     }
 
