@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "npx ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
+    "test": "npm run build && node --test test/*.test.js",
     "start": "node dist/index.js",
+    "db:init": "npx ts-node src/migrate.ts",
     "seed": "npx ts-node src/seed.ts"
   },
   "dependencies": {
-    "@types/pg": "^8.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.2.1",
@@ -20,7 +21,7 @@
     "nodemailer": "^9.0.2",
     "pg": "^8.20.0",
     "stripe": "^22.3.0",
-    "xlsx": "^0.18.5"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -29,6 +30,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^22.0.0",
     "@types/nodemailer": "^8.0.1",
+    "@types/pg": "^8.20.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.0"
   }

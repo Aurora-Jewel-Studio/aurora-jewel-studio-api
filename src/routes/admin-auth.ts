@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { generateAdminToken } from "../middleware/auth";
 import crypto from "crypto";
+import { schemas, validate } from "../validation";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
  * Body: { email, password }
  * Returns: { token }
  */
-router.post("/login", (req, res) => {
+router.post("/login", validate("body", schemas.adminLogin), (req, res) => {
   const { email, password } = req.body;
 
   const adminEmail = process.env.ADMIN_EMAIL;
@@ -20,13 +21,11 @@ router.post("/login", (req, res) => {
     return;
   }
 
-  const emailMatches = email === adminEmail;
-  const passwordMatches =
-    typeof password === "string" &&
-    crypto.timingSafeEqual(
-      Buffer.from(password.padEnd(adminPassword.length)),
-      Buffer.from(adminPassword.padEnd(password.length))
-    );
+  const emailMatches = email === adminEmail.toLowerCase();
+  const passwordMatches = crypto.timingSafeEqual(
+    crypto.createHash("sha256").update(password).digest(),
+    crypto.createHash("sha256").update(adminPassword).digest()
+  );
 
   if (!emailMatches || !passwordMatches) {
     res.status(401).json({ error: "Invalid credentials" });

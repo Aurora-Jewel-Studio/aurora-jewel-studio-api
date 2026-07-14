@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
+import { logError } from "../validation";
 
 const router = Router();
 
@@ -40,7 +41,7 @@ router.get("/", requireAdmin as any, async (req: AuthRequest, res) => {
     const productsResult = await query("SELECT COUNT(*) as count FROM products");
     const bespokeResult = await query("SELECT COUNT(*) as count FROM bespoke_requests WHERE status = 'pending'");
 
-    res.json({
+    res.set("Cache-Control", "no-store").json({
       totalRevenue,
       orderStatuses,
       revenueByDate: recentRevenueResult.rows,
@@ -48,7 +49,7 @@ router.get("/", requireAdmin as any, async (req: AuthRequest, res) => {
       pendingBespoke: parseInt(bespokeResult.rows[0].count)
     });
   } catch (error) {
-    console.error("Analytics fetch error:", error);
+    logError("Analytics fetch error", error);
     res.status(500).json({ error: "Failed to fetch analytics." });
   }
 });

@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { logError } from "../validation";
 
 const router = Router();
 
@@ -27,22 +28,32 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 // ── Fetch rates from free API ────────────────────────────────────────────────
 async function fetchRates(): Promise<Record<string, number>> {
-  const res = await fetch("https://open.er-api.com/v6/latest/USD");
+  const res = await fetch("https://open.er-api.com/v6/latest/USD", {
+    signal: AbortSignal.timeout(5_000),
+  });
   if (!res.ok) {
     throw new Error(`Exchange rate API returned ${res.status}`);
   }
 
-  const data = (await res.json()) as any;
-  if (data.result !== "success") {
+  const data = (await res.json()) as {
+    result?: string;
+    rates?: Record<string, unknown>;
+  };
+  if (data.result !== "success" || !data.rates) {
     throw new Error("Exchange rate API did not return success");
   }
 
   // Filter to only our supported currencies
   const filtered: Record<string, number> = {};
   for (const code of SUPPORTED_CURRENCIES) {
-    if (data.rates[code] !== undefined) {
-      filtered[code] = data.rates[code];
+    const rate = Number(data.rates[code]);
+    if (Number.isFinite(rate) && rate > 0) {
+      filtered[code] = rate;
     }
+  }
+
+  if (Object.keys(filtered).length !== SUPPORTED_CURRENCIES.length) {
+    throw new Error("Exchange rate API returned incomplete rates");
   }
 
   return filtered;
@@ -52,6 +63,7 @@ async function fetchRates(): Promise<Record<string, number>> {
 router.get("/", async (_req: Request, res: Response) => {
   try {
     const now = Date.now();
+    res.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
 
     // Return cached rates if still fresh
     if (cache && now - cache.fetchedAt < CACHE_TTL) {
@@ -73,8 +85,8 @@ router.get("/", async (_req: Request, res: Response) => {
       cached: false,
       fetchedAt: new Date(now).toISOString(),
     });
-  } catch (error: any) {
-    console.error("Exchange rate fetch failed:", error.message);
+  } catch (error) {
+    logError("Exchange rate fetch failed", error);
 
     // If we have stale cache, return it with a warning
     if (cache) {
@@ -88,25 +100,7 @@ router.get("/", async (_req: Request, res: Response) => {
       });
     }
 
-    // No cache at all — return hardcoded fallback rates (approximate)
-    return res.status(200).json({
-      base: "USD",
-      rates: {
-        USD: 1,
-        GBP: 0.79,
-        AUD: 1.53,
-        CAD: 1.36,
-        EUR: 0.92,
-        NPR: 133.5,
-        INR: 83.5,
-        JPY: 154.0,
-        CNY: 7.25,
-        AED: 3.67,
-      },
-      cached: false,
-      fallback: true,
-      error: "Using fallback rates",
-    });
+    return res.status(503).json({ error: "Exchange rates are temporarily unavailable." });
   }
 });
 

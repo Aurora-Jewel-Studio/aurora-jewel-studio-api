@@ -2,14 +2,29 @@ import { Router } from "express";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { query } from "../db";
+import crypto from "crypto";
+import { logError, schemas, validate } from "../validation";
 
 const router = Router();
+router.use((_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 const PAYPAL_SANDBOX_API = "https://api-m.sandbox.paypal.com";
 const PAYPAL_LIVE_API = "https://api-m.paypal.com";
+const ESEWA_TEST_PAYMENT_URL = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+const ESEWA_LIVE_PAYMENT_URL = "https://epay.esewa.com.np/api/epay/main/v2/form";
+const ESEWA_TEST_STATUS_URL = "https://rc.esewa.com.np/api/epay/transaction/status/";
+const ESEWA_LIVE_STATUS_URL = "https://esewa.com.np/api/epay/transaction/status/";
 
 function getFrontendUrl() {
-  return process.env.FRONTEND_URL || "http://localhost:3000";
+  const value = process.env.FRONTEND_URL || "http://localhost:3000";
+  const url = new URL(value);
+  if (process.env.NODE_ENV === "production" && url.protocol !== "https:") {
+    throw new Error("FRONTEND_URL must use HTTPS in production.");
+  }
+  return url.origin;
 }
 
 async function getOrderForPayment(orderId: unknown) {
@@ -55,7 +70,9 @@ function assertStripeOrderMatch(session: Stripe.Checkout.Session, order: any) {
 
 async function markOrderPaid(orderId: number, paymentMethod: string, paymentReference: string) {
   await query(
-    "UPDATE orders SET payment_status = 'paid', payment_method = $1, payment_reference = $2 WHERE id = $3",
+    `UPDATE orders
+     SET payment_status = 'paid', payment_method = $1, payment_reference = $2
+     WHERE id = $3 AND payment_status <> 'paid'`,
     [paymentMethod, paymentReference, orderId]
   );
 }
@@ -64,22 +81,16 @@ function getPayPalConfig() {
   const isLive = process.env.PAYPAL_ENV === "live";
   const clientId =
     process.env.PAYPAL_CLIENT_ID ||
-    process.env.PAYPAL_SANDBOX_CLIENT_ID ||
-    process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+    process.env.PAYPAL_SANDBOX_CLIENT_ID;
   const clientSecret =
     process.env.PAYPAL_CLIENT_SECRET ||
-    process.env.PAYPAL_SANDBOX_CLIENT_SECRET ||
-    process.env.PAYPAL_SECRET;
+    process.env.PAYPAL_SANDBOX_CLIENT_SECRET;
 
   return {
     clientId,
     clientSecret,
     baseUrl: isLive ? PAYPAL_LIVE_API : PAYPAL_SANDBOX_API,
     env: isLive ? "live" : "sandbox",
-    missing: [
-      !clientId ? "PAYPAL_CLIENT_ID or PAYPAL_SANDBOX_CLIENT_ID" : null,
-      !clientSecret ? "PAYPAL_CLIENT_SECRET or PAYPAL_SANDBOX_CLIENT_SECRET" : null,
-    ].filter(Boolean),
   };
 }
 
@@ -95,11 +106,11 @@ async function getPayPalAccessToken() {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: "grant_type=client_credentials",
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`PayPal token request failed: ${text}`);
+    throw new Error(`PayPal token request failed with status ${response.status}`);
   }
 
   const data = (await response.json()) as { access_token: string };
@@ -108,7 +119,26 @@ async function getPayPalAccessToken() {
 
 function getPayPalApprovalUrl(data: any) {
   const links = Array.isArray(data.links) ? data.links : [];
-  return links.find((link: any) => link.rel === "approve")?.href || null;
+  const href = links.find((link: any) => link.rel === "approve")?.href;
+  if (!href) return null;
+  const url = new URL(href);
+  const isPayPal = url.hostname === "paypal.com" || url.hostname.endsWith(".paypal.com");
+  return url.protocol === "https:" && isPayPal ? href : null;
+}
+
+function getEsewaConfig() {
+  const live = process.env.ESEWA_ENV === "live";
+  return {
+    merchantCode: process.env.ESEWA_MERCHANT_CODE,
+    secretKey: process.env.ESEWA_SECRET_KEY,
+    paymentUrl: live ? ESEWA_LIVE_PAYMENT_URL : ESEWA_TEST_PAYMENT_URL,
+    statusUrl: live ? ESEWA_LIVE_STATUS_URL : ESEWA_TEST_STATUS_URL,
+  };
+}
+
+export function createEsewaSignature(totalAmount: string, transactionUuid: string, productCode: string, secret: string) {
+  const message = `total_amount=${totalAmount},transaction_uuid=${transactionUuid},product_code=${productCode}`;
+  return crypto.createHmac("sha256", secret).update(message).digest("base64");
 }
 
 function assertPayPalOrderMatch(data: any, order: any) {
@@ -159,7 +189,7 @@ export async function handleStripeWebhook(req: Request, res: Response) {
 
     res.json({ received: true });
   } catch (error: any) {
-    console.error("Stripe webhook error:", error.message);
+    logError("Stripe webhook error", error);
     res.status(400).json({ error: "Invalid Stripe webhook." });
   }
 }
@@ -169,7 +199,10 @@ export async function handleStripeWebhook(req: Request, res: Response) {
 // Sandbox: use STRIPE_SECRET_KEY=sk_test_... and Stripe CLI webhook forwarding.
 // =============================================================================
 
-router.post("/stripe/create-checkout-session", async (req, res) => {
+router.post(
+  "/stripe/create-checkout-session",
+  validate("body", schemas.stripeCheckout),
+  async (req, res) => {
   try {
     const { order_id } = req.body;
     const stripe = getStripeClient();
@@ -182,6 +215,10 @@ router.post("/stripe/create-checkout-session", async (req, res) => {
     const order = await getOrderForPayment(order_id);
     if (!order) {
       res.status(404).json({ error: "Order not found." });
+      return;
+    }
+    if (order.payment_status === "paid") {
+      res.status(409).json({ error: "Order is already paid." });
       return;
     }
 
@@ -229,12 +266,16 @@ router.post("/stripe/create-checkout-session", async (req, res) => {
 
     res.json({ checkout_url: session.url, session_id: session.id });
   } catch (error) {
-    console.error("Stripe checkout error:", error);
+    logError("Stripe checkout error", error);
     res.status(500).json({ error: "Failed to create Stripe checkout session." });
   }
-});
+  }
+);
 
-router.post("/stripe/verify-session", async (req, res) => {
+router.post(
+  "/stripe/verify-session",
+  validate("body", schemas.stripeVerify),
+  async (req, res) => {
   try {
     const { session_id, order_id } = req.body;
     const stripe = getStripeClient();
@@ -265,32 +306,37 @@ router.post("/stripe/verify-session", async (req, res) => {
     await markOrderPaid(order.id, "stripe", session.id);
     res.json({ status: "verified", order_id: order.id });
   } catch (error) {
-    console.error("Stripe verify error:", error);
+    logError("Stripe verify error", error);
     res.status(500).json({ error: "Failed to verify Stripe session." });
   }
-});
+  }
+);
 
 // =============================================================================
 // PAYPAL CHECKOUT INTEGRATION
 // Sandbox: PAYPAL_ENV=sandbox with sandbox client credentials.
 // =============================================================================
 
-router.post("/paypal/create-order", async (req, res) => {
+router.post(
+  "/paypal/create-order",
+  validate("body", schemas.paypalCreate),
+  async (req, res) => {
   try {
     const { order_id } = req.body;
     const paypal = await getPayPalAccessToken();
 
     if (!paypal) {
-      res.status(503).json({
-        error: "PayPal payment is not configured.",
-        missing: getPayPalConfig().missing,
-      });
+      res.status(503).json({ error: "PayPal payment is not configured." });
       return;
     }
 
     const order = await getOrderForPayment(order_id);
     if (!order) {
       res.status(404).json({ error: "Order not found." });
+      return;
+    }
+    if (order.payment_status === "paid") {
+      res.status(409).json({ error: "Order is already paid." });
       return;
     }
 
@@ -327,12 +373,13 @@ router.post("/paypal/create-order", async (req, res) => {
           cancel_url: `${getFrontendUrl()}/checkout?cancelled=paypal`,
         },
       }),
+      signal: AbortSignal.timeout(10_000),
     });
 
     const data = (await response.json()) as any;
     if (!response.ok) {
-      console.error("PayPal create order error:", data);
-      res.status(response.status).json({ error: "PayPal order creation failed.", details: data });
+      logError("PayPal create order error", new Error(`Upstream status ${response.status}`));
+      res.status(502).json({ error: "PayPal order creation failed." });
       return;
     }
 
@@ -344,26 +391,22 @@ router.post("/paypal/create-order", async (req, res) => {
 
     res.json({ paypal_order_id: data.id, approve_url: approveUrl });
   } catch (error) {
-    console.error("PayPal create order error:", error);
+    logError("PayPal create order error", error);
     res.status(500).json({ error: "Failed to create PayPal order." });
   }
-});
+  }
+);
 
-router.post("/paypal/capture-order", async (req, res) => {
+router.post(
+  "/paypal/capture-order",
+  validate("body", schemas.paypalCapture),
+  async (req, res) => {
   try {
     const { order_id, paypal_order_id } = req.body;
     const paypal = await getPayPalAccessToken();
 
     if (!paypal) {
-      res.status(503).json({
-        error: "PayPal payment is not configured.",
-        missing: getPayPalConfig().missing,
-      });
-      return;
-    }
-
-    if (!paypal_order_id) {
-      res.status(400).json({ error: "paypal_order_id is required." });
+      res.status(503).json({ error: "PayPal payment is not configured." });
       return;
     }
 
@@ -381,13 +424,14 @@ router.post("/paypal/capture-order", async (req, res) => {
           Authorization: `Bearer ${paypal.accessToken}`,
           "Content-Type": "application/json",
         },
+        signal: AbortSignal.timeout(10_000),
       }
     );
 
     const data = (await response.json()) as any;
     if (!response.ok) {
-      console.error("PayPal capture error:", data);
-      res.status(response.status).json({ error: "PayPal capture failed.", details: data });
+      logError("PayPal capture error", new Error(`Upstream status ${response.status}`));
+      res.status(502).json({ error: "PayPal capture failed." });
       return;
     }
 
@@ -399,10 +443,11 @@ router.post("/paypal/capture-order", async (req, res) => {
     await markOrderPaid(order.id, "paypal", data.id);
     res.json({ status: "verified", order_id: order.id });
   } catch (error) {
-    console.error("PayPal capture error:", error);
+    logError("PayPal capture error", error);
     res.status(500).json({ error: "Failed to capture PayPal order." });
   }
-});
+  }
+);
 
 // =============================================================================
 // KHALTI PAYMENT INTEGRATION
@@ -431,19 +476,20 @@ interface KhaltiLookupResponse {
  * Initiates a Khalti payment session for an order.
  * Body: { order_id, amount, customer_name, customer_email, customer_phone }
  */
-router.post("/khalti/initiate", async (req, res) => {
+router.post(
+  "/khalti/initiate",
+  validate("body", schemas.khaltiInitiate),
+  async (req, res) => {
   try {
-    const { order_id, customer_name, customer_email, customer_phone } =
-      req.body;
-
-    if (!order_id) {
-      res.status(400).json({ error: "order_id is required." });
-      return;
-    }
+    const { order_id } = req.body;
 
     const order = await getOrderForPayment(order_id);
     if (!order) {
       res.status(404).json({ error: "Order not found." });
+      return;
+    }
+    if (order.payment_status === "paid") {
+      res.status(409).json({ error: "Order is already paid." });
       return;
     }
 
@@ -474,27 +520,26 @@ router.post("/khalti/initiate", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          return_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/checkout/success`,
-          website_url: process.env.FRONTEND_URL || "http://localhost:3000",
+          return_url: `${getFrontendUrl()}/checkout/success`,
+          website_url: getFrontendUrl(),
           amount, // Khalti expects paisa
           purchase_order_id: String(order_id),
           purchase_order_name: `Aurora Jewel Order #${order_id}`,
           customer_info: {
-            name: customer_name || "Customer",
-            email: customer_email || "",
-            phone: customer_phone || "",
+            name: order.customer_name,
+            email: order.customer_email,
+            phone: order.customer_phone || "",
           },
         }),
+        signal: AbortSignal.timeout(10_000),
       }
     );
 
     const data = (await response.json()) as KhaltiInitiateResponse;
 
     if (!response.ok) {
-      console.error("Khalti initiate error:", data);
-      res
-        .status(response.status)
-        .json({ error: "Khalti payment initiation failed.", details: data });
+      logError("Khalti initiate error", new Error(`Upstream status ${response.status}`));
+      res.status(502).json({ error: "Khalti payment initiation failed." });
       return;
     }
 
@@ -504,24 +549,23 @@ router.post("/khalti/initiate", async (req, res) => {
       pidx: data.pidx,
     });
   } catch (error) {
-    console.error("Khalti initiate error:", error);
+    logError("Khalti initiate error", error);
     res.status(500).json({ error: "Failed to initiate Khalti payment." });
   }
-});
+  }
+);
 
 /**
  * POST /api/payments/khalti/verify
  * Verifies a Khalti payment callback.
  * Body: { pidx, order_id }
  */
-router.post("/khalti/verify", async (req, res) => {
+router.post(
+  "/khalti/verify",
+  validate("body", schemas.khaltiVerify),
+  async (req, res) => {
   try {
     const { pidx, order_id } = req.body;
-
-    if (!pidx) {
-      res.status(400).json({ error: "pidx is required." });
-      return;
-    }
 
     const KHALTI_SECRET = process.env.KHALTI_SECRET_KEY;
     if (!KHALTI_SECRET) {
@@ -539,17 +583,15 @@ router.post("/khalti/verify", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ pidx }),
+        signal: AbortSignal.timeout(10_000),
       }
     );
 
     const data = (await response.json()) as KhaltiLookupResponse;
 
     if (!response.ok || data.status !== "Completed") {
-      console.error("Khalti verify failed:", data);
-      res.status(400).json({
-        error: "Payment verification failed.",
-        status: data.status,
-      });
+      logError("Khalti verify failed", new Error(`Upstream status ${response.status}`));
+      res.status(400).json({ error: "Payment verification failed." });
       return;
     }
 
@@ -574,17 +616,15 @@ router.post("/khalti/verify", async (req, res) => {
       return;
     }
 
-    await query(
-      "UPDATE orders SET payment_status = 'paid', payment_method = 'khalti', payment_reference = $1 WHERE id = $2",
-      [pidx, order.id]
-    );
+    await markOrderPaid(order.id, "khalti", pidx);
 
     res.json({ status: "verified", transaction: data });
   } catch (error) {
-    console.error("Khalti verify error:", error);
+    logError("Khalti verify error", error);
     res.status(500).json({ error: "Failed to verify Khalti payment." });
   }
-});
+  }
+);
 
 // =============================================================================
 // ESEWA PAYMENT INTEGRATION
@@ -593,125 +633,164 @@ router.post("/khalti/verify", async (req, res) => {
 
 /**
  * POST /api/payments/esewa/initiate
- * Generates the eSewa payment form data.
- * Body: { order_id, amount, tax_amount, delivery_charge }
+ * Generates signed ePay v2 form data.
+ * Body: { order_id }
  */
-router.post("/esewa/initiate", async (req, res) => {
+router.post(
+  "/esewa/initiate",
+  validate("body", schemas.esewaInitiate),
+  async (req, res) => {
   try {
-    const { order_id, tax_amount = 0, delivery_charge = 0 } = req.body;
-
-    if (!order_id) {
-      res.status(400).json({ error: "order_id is required." });
-      return;
-    }
+    const { order_id } = req.body;
 
     const order = await getOrderForPayment(order_id);
     if (!order) {
       res.status(404).json({ error: "Order not found." });
       return;
     }
+    if (order.payment_status === "paid") {
+      res.status(409).json({ error: "Order is already paid." });
+      return;
+    }
 
     if (!requireNprOrder(order)) {
       res.status(400).json({ error: "eSewa payments require an NPR order." });
       return;
     }
 
-    const ESEWA_MERCHANT = process.env.ESEWA_MERCHANT_CODE;
-    if (!ESEWA_MERCHANT) {
+    const config = getEsewaConfig();
+    if (!config.merchantCode || !config.secretKey) {
       res.status(503).json({ error: "eSewa payment is not configured." });
       return;
     }
 
-    const amount = Number(order.total_amount);
-    const total = amount + Number(tax_amount) + Number(delivery_charge);
+    const amount = formatAmount(order.total_amount);
+    if (!amount) {
+      res.status(400).json({ error: "Order total is invalid." });
+      return;
+    }
 
-    // Return form data for eSewa redirect
+    const transactionUuid = `AURORA-${order.id}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
+    const signature = createEsewaSignature(
+      amount,
+      transactionUuid,
+      config.merchantCode,
+      config.secretKey
+    );
+    await query(
+      `UPDATE orders SET payment_method = 'esewa', payment_reference = $1
+       WHERE id = $2 AND payment_status <> 'paid'`,
+      [transactionUuid, order.id]
+    );
+
     res.json({
-      payment_url: "https://esewa.com.np/epay/main",
+      payment_url: config.paymentUrl,
       form_data: {
-        amt: amount,
-        txAmt: tax_amount,
-        psc: 0,
-        pdc: delivery_charge,
-        tAmt: total,
-        pid: `AURORA-${order_id}`,
-        scd: ESEWA_MERCHANT,
-        su: `${process.env.FRONTEND_URL || "http://localhost:3000"}/checkout/success?method=esewa`,
-        fu: `${process.env.FRONTEND_URL || "http://localhost:3000"}/checkout/failure?method=esewa`,
+        amount,
+        tax_amount: "0",
+        total_amount: amount,
+        transaction_uuid: transactionUuid,
+        product_code: config.merchantCode,
+        product_service_charge: "0",
+        product_delivery_charge: "0",
+        success_url: `${getFrontendUrl()}/checkout/success?method=esewa&order_id=${order.id}`,
+        failure_url: `${getFrontendUrl()}/checkout/failure?method=esewa&order_id=${order.id}`,
+        signed_field_names: "total_amount,transaction_uuid,product_code",
+        signature,
       },
     });
   } catch (error) {
-    console.error("eSewa initiate error:", error);
+    logError("eSewa initiate error", error);
     res.status(500).json({ error: "Failed to initiate eSewa payment." });
   }
-});
+  }
+);
 
 /**
  * POST /api/payments/esewa/verify
- * Verifies an eSewa payment callback.
- * Body: { oid, amt, refId, order_id }
+ * Verifies payment using eSewa's server-to-server status endpoint.
+ * Body: { order_id } or { oid: transaction_uuid }
  */
-router.post("/esewa/verify", async (req, res) => {
+router.post(
+  "/esewa/verify",
+  validate("body", schemas.esewaVerify),
+  async (req, res) => {
   try {
-    const { oid, amt, refId, order_id } = req.body;
+    const { oid, order_id } = req.body;
 
-    if (!oid || !amt || !refId) {
-      res
-        .status(400)
-        .json({ error: "oid, amt, and refId are required." });
-      return;
-    }
-
-    const ESEWA_MERCHANT = process.env.ESEWA_MERCHANT_CODE;
-    if (!ESEWA_MERCHANT) {
+    const config = getEsewaConfig();
+    if (!config.merchantCode) {
       res.status(503).json({ error: "eSewa payment is not configured." });
       return;
     }
 
-    // Verify with eSewa
-    const verifyUrl = `https://uat.esewa.com.np/epay/transrec?amt=${amt}&scd=${ESEWA_MERCHANT}&pid=${oid}&rid=${refId}`;
-    const response = await fetch(verifyUrl);
-    const text = await response.text();
-
-    const isSuccess =
-      text.includes("<response_code>Success</response_code>") ||
-      text.includes("Success");
-
-    if (!isSuccess) {
-      res.status(400).json({ error: "eSewa payment verification failed." });
-      return;
+    let order = order_id ? await getOrderForPayment(order_id) : null;
+    if (!order && oid) {
+      const result = await query(
+        "SELECT * FROM orders WHERE payment_method = 'esewa' AND payment_reference = $1",
+        [oid]
+      );
+      order = result.rows[0] || null;
     }
-
-    const parsedOrderId = String(oid).replace(/^AURORA-/, "");
-    const order = await getOrderForPayment(order_id || parsedOrderId);
     if (!order) {
       res.status(404).json({ error: "Order not found." });
       return;
     }
-
-    if (
-      String(oid) !== `AURORA-${order.id}` ||
-      Math.round(Number(amt) * 100) !== moneyToMinorUnits(order.total_amount)
-    ) {
-      res.status(400).json({ error: "Payment details do not match the order." });
+    if (order.payment_method !== "esewa" && order.payment_status === "paid") {
+      res.status(400).json({ error: "Order was paid with a different method." });
       return;
     }
-
+    if (order.payment_status === "paid") {
+      res.json({ status: "verified", order_id: order.id });
+      return;
+    }
     if (!requireNprOrder(order)) {
       res.status(400).json({ error: "eSewa payments require an NPR order." });
       return;
     }
 
-    await query(
-      "UPDATE orders SET payment_status = 'paid', payment_method = 'esewa', payment_reference = $1 WHERE id = $2",
-      [refId, order.id]
-    );
+    const transactionUuid = String(order.payment_reference || "");
+    const amount = formatAmount(order.total_amount);
+    if (!transactionUuid || !amount) {
+      res.status(400).json({ error: "Order has no active eSewa payment." });
+      return;
+    }
 
-    res.json({ status: "verified", refId });
+    const params = new URLSearchParams({
+      product_code: config.merchantCode,
+      total_amount: amount,
+      transaction_uuid: transactionUuid,
+    });
+    const response = await fetch(`${config.statusUrl}?${params}`, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    const data = (await response.json()) as {
+      product_code?: string;
+      transaction_uuid?: string;
+      total_amount?: number | string;
+      status?: string;
+      ref_id?: string;
+    };
+
+    if (
+      !response.ok ||
+      data.status !== "COMPLETE" ||
+      data.product_code !== config.merchantCode ||
+      data.transaction_uuid !== transactionUuid ||
+      moneyToMinorUnits(data.total_amount) !== moneyToMinorUnits(order.total_amount) ||
+      !data.ref_id
+    ) {
+      res.status(400).json({ error: "eSewa payment verification failed." });
+      return;
+    }
+
+    await markOrderPaid(order.id, "esewa", data.ref_id);
+    res.json({ status: "verified", refId: data.ref_id, order_id: order.id });
   } catch (error) {
-    console.error("eSewa verify error:", error);
+    logError("eSewa verify error", error);
     res.status(500).json({ error: "Failed to verify eSewa payment." });
   }
-});
+  }
+);
 
 export default router;

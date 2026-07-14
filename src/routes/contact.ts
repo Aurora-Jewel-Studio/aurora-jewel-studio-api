@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "../db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
+import { logError, schemas, validate } from "../validation";
 
 const router = Router();
 
@@ -8,14 +9,12 @@ const router = Router();
  * POST /api/contact
  * Public — submit a contact form message.
  */
-router.post("/", async (req, res) => {
+router.post("/", validate("body", schemas.contact), async (req, res) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const { name, email, subject, message, website } = req.body;
 
-    if (!name || !email || !subject || !message) {
-      res.status(400).json({
-        error: "Name, email, subject, and message are required.",
-      });
+    if (website) {
+      res.status(201).json({ success: true, message: "Message received." });
       return;
     }
 
@@ -24,9 +23,13 @@ router.post("/", async (req, res) => {
       [name, email, subject, message]
     );
 
-    res.status(201).json({ contact_message: result.rows[0] });
+    res.status(201).json({
+      success: true,
+      message: "Message received.",
+      contact_message: result.rows[0],
+    });
   } catch (error) {
-    console.error("Contact submit error:", error);
+    logError("Contact submit error", error);
     res.status(500).json({ error: "Failed to submit contact message." });
   }
 });
@@ -42,7 +45,7 @@ router.get("/", requireAdmin as any, async (_req: AuthRequest, res) => {
     );
     res.json({ contact_messages: result.rows });
   } catch (error) {
-    console.error("Contact list error:", error);
+    logError("Contact list error", error);
     res.status(500).json({ error: "Failed to fetch contact messages." });
   }
 });
@@ -51,13 +54,17 @@ router.get("/", requireAdmin as any, async (_req: AuthRequest, res) => {
  * PATCH /api/contact/:id/read
  * Admin-only — mark a message as read.
  */
-router.patch("/:id/read", requireAdmin as any, async (req: AuthRequest, res) => {
+router.patch(
+  "/:id/read",
+  requireAdmin as any,
+  validate("params", schemas.idParams),
+  async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
 
     const result = await query(
       "UPDATE contact_messages SET is_read = TRUE WHERE id = $1 RETURNING *",
-      [parseInt(id as string)]
+      [id]
     );
 
     if (result.rowCount === 0) {
@@ -67,9 +74,10 @@ router.patch("/:id/read", requireAdmin as any, async (req: AuthRequest, res) => 
 
     res.json({ contact_message: result.rows[0] });
   } catch (error) {
-    console.error("Contact read error:", error);
+    logError("Contact read error", error);
     res.status(500).json({ error: "Failed to update contact message." });
   }
-});
+  }
+);
 
 export default router;

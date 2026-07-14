@@ -4,22 +4,36 @@ import dotenv from 'dotenv';
 dotenv.config();
 dotenv.config({ path: ".env.local", override: true });
 
+const connectionString = process.env.POSTGRES_URL?.replace(
+  /([?&])sslmode=require(?=&|$)/,
+  "$1sslmode=verify-full"
+);
+
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: { rejectUnauthorized: false }, // Always allow SSL for cloud databases
-  connectionTimeoutMillis: 10000,
+  connectionString,
+  // ponytail: five connections per warm instance; raise only with DB capacity metrics.
+  max: 5,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 5_000,
 });
 
 export const query = (text: string, params?: any[]) => pool.query(text, params);
+
+pool.on("error", (error) => {
+  console.error("Unexpected database pool error:", error.message);
+});
 
 /**
  * Initialize the database tables.
  * Safe to call multiple times — uses IF NOT EXISTS.
  */
 export async function initDatabase() {
+  if (!process.env.POSTGRES_URL) {
+    throw new Error("POSTGRES_URL is required.");
+  }
+
+  const client = await pool.connect();
   try {
-    const client = await pool.connect();
-    try {
       await client.query(`
       CREATE TABLE IF NOT EXISTS bespoke_requests (
         id SERIAL PRIMARY KEY,
@@ -31,6 +45,10 @@ export async function initDatabase() {
         description TEXT NOT NULL,
         inquiry_type VARCHAR(50) DEFAULT 'Custom',
         reference_image TEXT,
+        company_name VARCHAR(200),
+        country VARCHAR(100),
+        buyer_type VARCHAR(100),
+        order_quantity_range VARCHAR(100),
         status VARCHAR(30) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT NOW()
       );
@@ -95,7 +113,11 @@ export async function initDatabase() {
     await client.query(`
       ALTER TABLE bespoke_requests
       ADD COLUMN IF NOT EXISTS inquiry_type VARCHAR(50) DEFAULT 'Custom',
-      ADD COLUMN IF NOT EXISTS reference_image TEXT;
+      ADD COLUMN IF NOT EXISTS reference_image TEXT,
+      ADD COLUMN IF NOT EXISTS company_name VARCHAR(200),
+      ADD COLUMN IF NOT EXISTS country VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS buyer_type VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS order_quantity_range VARCHAR(100);
     `);
 
     await client.query(`
@@ -109,14 +131,22 @@ export async function initDatabase() {
       ALTER COLUMN price TYPE NUMERIC(10,2);
     `);
 
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS products_category_handle_idx ON products (category_handle);
+      CREATE INDEX IF NOT EXISTS products_created_at_idx ON products (created_at DESC);
+      CREATE INDEX IF NOT EXISTS products_search_idx ON products USING GIN (
+        to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(description, ''))
+      );
+      CREATE INDEX IF NOT EXISTS bespoke_requests_created_at_idx ON bespoke_requests (created_at DESC);
+      CREATE INDEX IF NOT EXISTS contact_messages_created_at_idx ON contact_messages (created_at DESC);
+      CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at DESC);
+      CREATE INDEX IF NOT EXISTS orders_payment_status_created_at_idx
+        ON orders (payment_status, created_at DESC);
+    `);
+
     console.log("✅ Database tables initialized");
-    } finally {
-      client.release();
-    }
-  } catch (error: any) {
-    console.error("⚠️ Non-fatal: Database initialization script failed or timed out:", error.message);
-    // We swallow the error so that the server can still boot and serve requests.
-    // In serverless environments, connection resets (ECONNRESET) during heavy DDL scripts are common.
+  } finally {
+    client.release();
   }
 }
 

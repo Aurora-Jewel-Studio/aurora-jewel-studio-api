@@ -32,7 +32,14 @@ export function requireAdmin(
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, getJwtSecret()) as { email: string };
+    const decoded = jwt.verify(token, getJwtSecret(), {
+      algorithms: ["HS256"],
+      issuer: "aurora-jewel-api",
+      audience: "aurora-jewel-admin",
+    }) as { email: string };
+    if (!process.env.ADMIN_EMAIL || decoded.email !== process.env.ADMIN_EMAIL.toLowerCase()) {
+      throw new Error("Admin account does not match.");
+    }
     req.adminEmail = decoded.email;
     next();
   } catch {
@@ -45,5 +52,10 @@ export function requireAdmin(
  * Generate a JWT token for an admin user.
  */
 export function generateAdminToken(email: string): string {
-  return jwt.sign({ email }, getJwtSecret(), { expiresIn: "7d" });
+  return jwt.sign({ email: email.toLowerCase() }, getJwtSecret(), {
+    algorithm: "HS256",
+    expiresIn: "8h",
+    issuer: "aurora-jewel-api",
+    audience: "aurora-jewel-admin",
+  });
 }

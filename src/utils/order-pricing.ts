@@ -84,14 +84,27 @@ export async function priceCartItems(rawItems: unknown, requestedCurrency = "usd
     throw new CartPricingError("Cart must contain between 1 and 50 items.");
   }
 
+  const productHandles = rawItems.map((rawItem, index) => {
+    const handle = (rawItem as Record<string, unknown>)?.productHandle;
+    if (typeof handle !== "string" || !handle) {
+      throw new CartPricingError(`Invalid product for cart item ${index + 1}.`);
+    }
+    return handle;
+  });
+
   const result = await query(
-    "SELECT handle, title, price, currency, thumbnail, variants FROM products"
+    "SELECT handle, title, price, currency, thumbnail, variants FROM products WHERE handle = ANY($1::text[])",
+    [[...new Set(productHandles)]]
   );
   const products = result.rows as ProductRow[];
   const productsByHandle = new Map(products.map((product) => [product.handle, product]));
 
   const currency = requestedCurrency.toLowerCase();
+  if (!/^[a-z]{3}$/.test(currency)) {
+    throw new CartPricingError("Invalid cart currency.");
+  }
   let cartCurrency: string | null = null;
+  const seenVariants = new Set<string>();
 
   const pricedItems = rawItems.map((rawItem, index) => {
     const item = rawItem as Record<string, unknown>;
@@ -104,13 +117,7 @@ export async function priceCartItems(rawItems: unknown, requestedCurrency = "usd
     const variantId = typeof item.variantId === "string" ? item.variantId : "";
     const variantTitle = typeof item.variantTitle === "string" ? item.variantTitle : "";
 
-    const product =
-      productsByHandle.get(productHandle) ||
-      products.find((candidate) =>
-        candidate.variants?.some(
-          (variant) => variant.id === variantId || variant.sku === variantId
-        )
-      );
+    const product = productsByHandle.get(productHandle);
 
     if (!product) {
       throw new CartPricingError(`Unknown product in cart item ${index + 1}.`);
@@ -124,7 +131,7 @@ export async function priceCartItems(rawItems: unknown, requestedCurrency = "usd
           (variantId && (candidate.id === variantId || candidate.sku === variantId || key === variantId)) ||
           (variantTitle && candidate.title === variantTitle)
         );
-      }) || variants[0];
+      });
 
     if (!variant) {
       throw new CartPricingError(`No purchasable variant found for ${product.title}.`);
@@ -141,6 +148,10 @@ export async function priceCartItems(rawItems: unknown, requestedCurrency = "usd
     cartCurrency = priced.currency;
 
     const canonicalVariantId = getVariantKey(product.handle, variant);
+    if (seenVariants.has(canonicalVariantId)) {
+      throw new CartPricingError(`Duplicate variant in cart item ${index + 1}.`);
+    }
+    seenVariants.add(canonicalVariantId);
     const subtotal = Math.round(priced.price * quantity * 100) / 100;
 
     return {
@@ -160,6 +171,9 @@ export async function priceCartItems(rawItems: unknown, requestedCurrency = "usd
   const totalAmount = Math.round(
     pricedItems.reduce((sum, item) => sum + item.subtotal, 0) * 100
   ) / 100;
+  if (totalAmount <= 0 || totalAmount > 99_999_999.99) {
+    throw new CartPricingError("Cart total is outside the supported range.");
+  }
 
   return {
     items: pricedItems,

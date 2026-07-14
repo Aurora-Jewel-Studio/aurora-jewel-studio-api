@@ -2,18 +2,22 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { requireAdmin } from "../middleware/auth";
+import { logError } from "../validation";
 
 const router = Router();
 
 // Ensure upload directory exists
 const uploadDir = path.join(__dirname, "../../public/uploads");
-try {
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+if (process.env.NODE_ENV !== "production") {
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+  } catch (error) {
+    logError("Could not create local upload directory", error);
   }
-} catch (error) {
-  console.warn("Could not create upload directory. This is expected in read-only serverless environments like Vercel.");
 }
 
 // Configure multer storage
@@ -22,8 +26,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+    cb(null, `${file.fieldname}-${crypto.randomUUID()}${path.extname(file.originalname).toLowerCase()}`);
   },
 });
 
@@ -46,18 +49,30 @@ const upload = multer({
  * POST /api/uploads
  * Admin-only - upload a single image
  */
-router.post("/", requireAdmin as any, upload.single("image"), (req: any, res: any) => {
+router.post(
+  "/",
+  requireAdmin as any,
+  (_req, res, next) => {
+    if (process.env.NODE_ENV === "production") {
+      res.status(503).json({ error: "Image uploads require persistent object storage." });
+      return;
+    }
+    next();
+  },
+  upload.single("image"),
+  (req: any, res: any) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
     const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: fileUrl });
-  } catch (error: any) {
-    console.error("Upload error:", error);
-    res.status(500).json({ error: error.message || "Failed to upload image" });
+    res.json({ success: true, url: fileUrl });
+  } catch (error) {
+    logError("Upload error", error);
+    res.status(500).json({ error: "Failed to upload image" });
   }
-});
+  }
+);
 
 export default router;

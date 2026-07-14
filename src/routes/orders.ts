@@ -2,6 +2,7 @@ import { Router } from "express";
 import { query } from "../db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
 import { CartPricingError, priceCartItems } from "../utils/order-pricing";
+import { logError, schemas, validate } from "../validation";
 
 const router = Router();
 
@@ -9,7 +10,7 @@ const router = Router();
  * POST /api/orders
  * Public — create a new order from cart checkout.
  */
-router.post("/", async (req, res) => {
+router.post("/", validate("body", schemas.order), async (req, res) => {
   try {
     const {
       items,
@@ -21,15 +22,7 @@ router.post("/", async (req, res) => {
       payment_method,
     } = req.body;
 
-    if (!items || !customer_name || !customer_email) {
-      res.status(400).json({
-        error:
-          "Items, customer name, and customer email are required.",
-      });
-      return;
-    }
-
-    const pricedCart = await priceCartItems(items, currency || "usd");
+    const pricedCart = await priceCartItems(items, currency);
 
     const result = await query(
       `INSERT INTO orders (
@@ -51,9 +44,9 @@ router.post("/", async (req, res) => {
       ]
     );
 
-    res.status(201).json({ order: result.rows[0] });
+    res.status(201).json({ success: true, order: result.rows[0] });
   } catch (error) {
-    console.error("Order create error:", error);
+    logError("Order create error", error);
     if (error instanceof CartPricingError) {
       res.status(400).json({ error: error.message });
       return;
@@ -71,7 +64,7 @@ router.get("/", requireAdmin as any, async (_req: AuthRequest, res) => {
     const result = await query("SELECT * FROM orders ORDER BY created_at DESC");
     res.json({ orders: result.rows });
   } catch (error) {
-    console.error("Order list error:", error);
+    logError("Order list error", error);
     res.status(500).json({ error: "Failed to fetch orders." });
   }
 });
@@ -80,11 +73,15 @@ router.get("/", requireAdmin as any, async (_req: AuthRequest, res) => {
  * GET /api/orders/:id
  * Admin-only — get a single order.
  */
-router.get("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
+router.get(
+  "/:id",
+  requireAdmin as any,
+  validate("params", schemas.idParams),
+  async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const result = await query("SELECT * FROM orders WHERE id = $1", [
-      parseInt(id as string),
+      id,
     ]);
 
     if (result.rowCount === 0) {
@@ -94,42 +91,35 @@ router.get("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
 
     res.json({ order: result.rows[0] });
   } catch (error) {
-    console.error("Order get error:", error);
+    logError("Order get error", error);
     res.status(500).json({ error: "Failed to fetch order." });
   }
-});
+  }
+);
 
 /**
  * PATCH /api/orders/:id
  * Admin-only — update order status or payment status.
  */
-router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
+router.patch(
+  "/:id",
+  requireAdmin as any,
+  validate("params", schemas.idParams),
+  validate("body", schemas.orderStatus),
+  async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     const { order_status, payment_status, payment_reference } = req.body;
 
-    if (order_status) {
-      await query("UPDATE orders SET order_status = $1 WHERE id = $2", [
-        order_status,
-        parseInt(id as string),
-      ]);
-    }
-    if (payment_status) {
-      await query("UPDATE orders SET payment_status = $1 WHERE id = $2", [
-        payment_status,
-        parseInt(id as string),
-      ]);
-    }
-    if (payment_reference) {
-      await query("UPDATE orders SET payment_reference = $1 WHERE id = $2", [
-        payment_reference,
-        parseInt(id as string),
-      ]);
-    }
-
-    const result = await query("SELECT * FROM orders WHERE id = $1", [
-      parseInt(id as string),
-    ]);
+    const result = await query(
+      `UPDATE orders
+       SET order_status = COALESCE($1, order_status),
+           payment_status = COALESCE($2, payment_status),
+           payment_reference = COALESCE($3, payment_reference)
+       WHERE id = $4
+       RETURNING *`,
+      [order_status || null, payment_status || null, payment_reference || null, id]
+    );
 
     if (result.rowCount === 0) {
       res.status(404).json({ error: "Order not found." });
@@ -138,9 +128,10 @@ router.patch("/:id", requireAdmin as any, async (req: AuthRequest, res) => {
 
     res.json({ order: result.rows[0] });
   } catch (error) {
-    console.error("Order update error:", error);
+    logError("Order update error", error);
     res.status(500).json({ error: "Failed to update order." });
   }
-});
+  }
+);
 
 export default router;
