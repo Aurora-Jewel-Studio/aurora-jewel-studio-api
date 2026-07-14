@@ -15,11 +15,10 @@
  *   - side1.webp  → gallery image 1
  *   - side2.webp  → gallery image 2
  *
- * ADMIN CREDENTIALS are loaded from .env (ADMIN_EMAIL, ADMIN_PASSWORD)
- * Default: admin@aurorajewelstudio.com / aurora123
+ * Admin credentials are configured separately through environment variables.
  */
 
-import { initDatabase, query } from "./db";
+import pool, { initDatabase } from "./db";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -1688,24 +1687,24 @@ const PRODUCTS: ProductSeed[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function seed() {
+  const placeholders = PRODUCTS.filter((product) => JSON.stringify(product).includes("ADD HERE"));
+  if (placeholders.length) {
+    throw new Error(`Seed contains placeholder data: ${placeholders.map((product) => product.handle).join(", ")}`);
+  }
+
   console.log("🌱 Initialising Aurora Jewel database...\n");
   await initDatabase();
 
-  // ── Admin credentials info ──────────────────────────────────────────────
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@aurorajewelstudio.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "aurora123";
-  console.log("🔐 Admin Credentials (from .env):");
-  console.log(`   Email:    ${adminEmail}`);
-  console.log(`   Password: ${adminPassword}`);
-  console.log(`   URL:      http://localhost:3000/admin\n`);
-
-  // ── Clear existing products (fresh seed) ────────────────────────────────
-  console.log("🗑️  Clearing existing products...");
-  await query("DELETE FROM products");
-
-  // ── Products ────────────────────────────────────────────────────────────
-  console.log("📦 Seeding products...\n");
+  const client = await pool.connect();
   let inserted = 0;
+
+  try {
+    await client.query("BEGIN");
+    console.log("🗑️  Clearing existing products...");
+    await client.query("DELETE FROM products");
+
+    // ── Products ──────────────────────────────────────────────────────────
+    console.log("📦 Seeding products...\n");
 
   for (const p of PRODUCTS) {
     const silverVariant =
@@ -1713,7 +1712,7 @@ async function seed() {
       p.variants[0];
     const basePrice = silverVariant?.prices?.usd || 0;
 
-    await query(
+    await client.query(
       `INSERT INTO products
          (handle, title, description, price, currency, thumbnail, images, options, variants, category_handle, weight, features)
        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11, $12::jsonb)`,
@@ -1737,6 +1736,14 @@ async function seed() {
       `   ✅ ${p.title} — ${p.category_handle} — USD $${basePrice.toLocaleString()}`,
     );
     inserted++;
+  }
+
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
 
   console.log(`\n✨ Done! ${inserted} products seeded.`);
