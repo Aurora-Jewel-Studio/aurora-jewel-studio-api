@@ -30,7 +30,7 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
 ## 📁 Project Structure
 
 - `/src/index.ts`: Application entry point setting up middleware, routes, and local server configurations.
-- `/src/db.ts`: Connection pooling and automatic database schema migration.
+- `/src/db.ts`: Serverless-safe connection pooling and idempotent schema initialization.
 - `/src/seed.ts`: Catalog seeding script containing sample luxury product details.
 - `/src/middleware/auth.ts`: JWT checks validating requests to admin-only API routes.
 - `/src/routes/`:
@@ -59,26 +59,25 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
    npm install
    ```
 
-2. Configure environment variables in `.env` (refer to `credential.md` in the root workspace):
-   ```env
-   POSTGRES_URL=postgres://user:password@localhost:5432/aurora_jewel_db
-   ADMIN_JWT_SECRET=your_secret_key
-   ADMIN_EMAIL=admin@aurorajewelstudio.com
-   ADMIN_PASSWORD=aurora123
-   ALLOWED_ORIGINS=http://localhost:3000
-   ```
+2. Copy `.env.example` to `.env` and replace every placeholder. Use a random
+   `ADMIN_JWT_SECRET` of at least 32 characters and a unique admin password.
 
 3. Spin up PostgreSQL database container:
    ```bash
    docker-compose up -d
    ```
 
-4. Seed the database with sample products and collections:
+4. Initialize or update the schema explicitly (this is not run during Vercel cold starts):
+   ```bash
+   npm run db:init
+   ```
+
+5. After removing every placeholder from the catalog, seed products if needed:
    ```bash
    npm run seed
    ```
 
-5. Launch the local API server:
+6. Launch the local API server:
    ```bash
    npm run dev
    ```
@@ -91,4 +90,5 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
 The backend compiles into serverless route blocks. Vercel maps files dynamically via [vercel.json](vercel.json):
 *   **Database:** Provision a serverless Postgres DB in the Vercel dashboard.
 *   **Environment:** Set variables in Project Settings.
-*   **Allowed Origins:** Update `ALLOWED_ORIGINS` to include your production Hostinger domain.
+*   **Allowed Origins:** Production is restricted to `aurorajewelstudio.com` and its `www` host.
+*   **Uploads:** Local disk uploads are disabled on Vercel; configure persistent object storage before enabling admin uploads in production.
