@@ -1,9 +1,16 @@
 import { Router } from "express";
+import nodemailer from "nodemailer";
 import { query } from "../db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
 import { logError, schemas, validate } from "../validation";
 
 const router = Router();
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.hostinger.com",
+  port: parseInt(process.env.SMTP_PORT || "465", 10),
+  secure: parseInt(process.env.SMTP_PORT || "465", 10) === 465,
+  auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+});
 
 /**
  * POST /api/contact
@@ -22,11 +29,34 @@ router.post("/", validate("body", schemas.contact), async (req, res) => {
       "INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4) RETURNING *",
       [name, email, subject, message]
     );
+    const contactMessage = result.rows[0];
+
+    try {
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        await transporter.sendMail({
+          from: `"Aurora Jewel Studio" <${process.env.SMTP_USER}>`,
+          to: "contact@aurorajewelstudio.com",
+          replyTo: contactMessage.email,
+          subject: `New website submission #${contactMessage.id}`,
+          text: [
+            `Name: ${contactMessage.name}`,
+            `Email: ${contactMessage.email}`,
+            `Subject: ${contactMessage.subject}`,
+            "",
+            contactMessage.message,
+          ].join("\n"),
+        });
+      } else {
+        console.warn("Contact notification email is not configured.");
+      }
+    } catch (emailError) {
+      logError("Contact notification email failed", emailError);
+    }
 
     res.status(201).json({
       success: true,
       message: "Message received.",
-      contact_message: result.rows[0],
+      contact_message: contactMessage,
     });
   } catch (error) {
     logError("Contact submit error", error);

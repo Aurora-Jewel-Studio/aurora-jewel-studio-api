@@ -13,6 +13,15 @@ test("public form schemas normalize valid input and reject unsafe images", () =>
   assert.equal(contact.name, "Ada Lovelace");
   assert.equal(contact.email, "ada@example.com");
 
+  const newsletter = schemas.contact.parse({
+    name: "Newsletter subscriber",
+    email: "reader@example.com",
+    subject: "Newsletter subscription",
+    message: "Please add this email address to the Aurora Jewel Studio newsletter.",
+    website: "",
+  });
+  assert.equal(newsletter.subject, "Newsletter subscription");
+
   const unsafeImage = schemas.bespoke.safeParse({
     first_name: "Ada",
     last_name: "Lovelace",
