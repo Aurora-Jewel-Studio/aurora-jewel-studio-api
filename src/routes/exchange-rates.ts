@@ -59,6 +59,15 @@ async function fetchRates(): Promise<Record<string, number>> {
   return filtered;
 }
 
+export async function getExchangeRates(): Promise<Record<string, number>> {
+  const now = Date.now();
+  if (cache && now - cache.fetchedAt < CACHE_TTL) return cache.rates;
+
+  const rates = await fetchRates();
+  cache = { rates, fetchedAt: now };
+  return rates;
+}
+
 // ── GET /api/exchange-rates ──────────────────────────────────────────────────
 router.get("/", async (_req: Request, res: Response) => {
   try {
@@ -76,8 +85,7 @@ router.get("/", async (_req: Request, res: Response) => {
     }
 
     // Fetch fresh rates
-    const rates = await fetchRates();
-    cache = { rates, fetchedAt: now };
+    const rates = await getExchangeRates();
 
     return res.json({
       base: "USD",

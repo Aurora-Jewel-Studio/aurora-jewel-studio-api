@@ -57,6 +57,23 @@ const productFields = {
 };
 
 const orderIdBody = z.object({ order_id: id });
+const chatLocale = z.enum(["en", "en-US", "en-GB", "en-AU", "en-IN", "en-NP", "ne-NP"]);
+const chatCurrency = z.enum(["USD", "GBP", "AUD", "CAD", "EUR", "NPR", "INR", "JPY", "CNY", "AED"]);
+const chatTurn = z
+  .object({
+    role: z.enum(["user", "assistant"]),
+    content: text(1_000),
+  })
+  .strict();
+const chatCartItem = z
+  .object({
+    variantId: text(120),
+    productHandle: slug,
+    title: text(255),
+    variantTitle: text(100),
+    quantity: z.number().int().min(1).max(99),
+  })
+  .strict();
 
 export const schemas = {
   adminLogin: z.object({ email, password: z.string().min(1).max(256) }),
@@ -131,6 +148,22 @@ export const schemas = {
     page: queryInteger.pipe(z.number().min(1)).optional(),
     limit: queryInteger.pipe(z.number().min(1).max(100)).optional(),
   }),
+  chat: z
+    .object({
+      message: text(1_000),
+      history: z.array(chatTurn).max(8).default([]),
+      channel: z.literal("website"),
+      currency: chatCurrency,
+      locale: chatLocale,
+      cart: z.array(chatCartItem).max(50).default([]),
+      pageUrl: z
+        .url()
+        .max(2_048)
+        .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), "Invalid page URL"),
+      productId: z.union([z.number().int().positive(), slug]).optional(),
+      refinement: z.literal("lower_price").optional(),
+    })
+    .strict(),
   stripeCheckout: orderIdBody,
   stripeVerify: z.object({ session_id: text(255), order_id: id.optional() }),
   paypalCreate: orderIdBody,

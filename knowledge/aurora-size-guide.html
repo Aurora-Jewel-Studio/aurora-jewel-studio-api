@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora — Size Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FAF6F0;
+    --card:#FFFFFF;
+    --wine:#6B2737;
+    --wine-light:#F4E6E9;
+    --sage:#7C8B6F;
+    --sage-light:#EEF1EA;
+    --gold:#B8924A;
+    --gold-light:#FBF3E4;
+    --ink:#2B2420;
+    --ink-soft:#6B6258;
+    --line:#E8E1D6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:40px 20px 64px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--wine);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:38px;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .sub{
+    font-size:15px;
+    color:var(--ink-soft);
+    margin:0 0 36px;
+    line-height:1.6;
+    max-width:520px;
+  }
+  .type-row{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+  }
+  .type-btn{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    padding:9px 18px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .type-btn.active{
+    background:var(--wine);
+    border-color:var(--wine);
+    color:#fff;
+  }
+  .type-btn:hover:not(.active){
+    border-color:var(--wine);
+    color:var(--wine);
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 28px 24px;
+    margin-bottom:24px;
+  }
+  .panel-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .panel-hint{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+  }
+  th{
+    text-align:left;
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:0 12px 10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:11px 12px 11px 0;
+    border-bottom:1px solid var(--line);
+    color:var(--ink);
+  }
+  tr:last-child td{border-bottom:none;}
+  td.us{font-weight:600;color:var(--wine);}
+  .measure-note{
+    margin-top:18px;
+    padding:14px 16px;
+    background:var(--sage-light);
+    border-radius:10px;
+    font-size:13px;
+    color:#4A5340;
+    line-height:1.6;
+  }
+  .measure-note b{color:#3A4232;}
+
+  .checkout-section{
+    margin-top:48px;
+  }
+  .section-label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .section-label .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--gold);
+  }
+  .section-label span{
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--gold);
+  }
+  .checkout-card{
+    background:var(--card);
+    border:1.5px solid var(--wine);
+    border-radius:var(--radius);
+    padding:26px 28px 28px;
+  }
+  .checkout-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+  }
+  .checkout-head h2{
+    font-family:'Cormorant Garamond',serif;
+    font-size:24px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .checkout-head p{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0;
+    max-width:380px;
+  }
+  .required-tag{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    background:var(--wine-light);
+    color:var(--wine);
+    padding:5px 12px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .field-group{
+    margin-bottom:20px;
+  }
+  .field-label{
+    font-size:13px;
+    font-weight:500;
+    margin-bottom:10px;
+    color:var(--ink);
+  }
+  .field-label .req-star{color:var(--wine);}
+  .scale-toggle{
+    display:flex;
+    gap:6px;
+    margin-bottom:12px;
+  }
+  .scale-pill{
+    font-size:12px;
+    font-weight:500;
+    padding:6px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--ivory);
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .scale-pill.active{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#fff;
+  }
+  .size-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(56px,1fr));
+    gap:8px;
+  }
+  .size-chip{
+    text-align:center;
+    padding:10px 4px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--ivory);
+    font-size:14px;
+    font-weight:500;
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .size-chip:hover{border-color:var(--wine);}
+  .size-chip.selected{
+    background:var(--wine);
+    border-color:var(--wine);
+    color:#fff;
+  }
+  .helper-link{
+    font-size:12px;
+    color:var(--wine);
+    text-decoration:underline;
+    cursor:pointer;
+    margin-top:10px;
+    display:inline-block;
+  }
+  .checkout-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .status-msg{
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .status-msg.ok{color:#4A7A4A;font-weight:500;}
+  .cta-btn{
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    padding:12px 26px;
+    border-radius:10px;
+    border:none;
+    background:#D9D2C5;
+    color:#9A917F;
+    cursor:not-allowed;
+    transition:all .15s ease;
+  }
+  .cta-btn.enabled{
+    background:var(--wine);
+    color:#fff;
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Aurora size guide</p>
+  <h1>Find your fit</h1>
+  <p class="sub">Every Aurora piece is made to order, just for you — so getting your size right means your piece is perfect from the moment it arrives. Use whichever scale you're used to.</p>
+
+  <div class="type-row" id="typeRow">
+    <button class="type-btn active" data-type="ring">Ring</button>
+    <button class="type-btn" data-type="bracelet">Bracelet</button>
+    <button class="type-btn" data-type="necklace">Necklace</button>
+    <button class="type-btn" data-type="earring">Earring (drop length)</button>
+    <button class="type-btn" data-type="brooch">Brooch</button>
+  </div>
+
+  <div class="panel" id="chartPanel">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="checkout-section">
+    <div class="section-label"><span class="dot"></span><span>Required before checkout</span></div>
+    <div class="checkout-card">
+      <div class="checkout-head">
+        <div>
+          <h2>Confirm your size</h2>
+          <p>This applies to ring and bracelet pieces from our existing collections. We'll use this exact size to make your piece.</p>
+        </div>
+        <div class="required-tag">Mandatory</div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Ring size <span class="req-star">*</span></div>
+        <div class="scale-toggle" id="ringScaleToggle">
+          <div class="scale-pill active" data-scale="us">US</div>
+          <div class="scale-pill" data-scale="uk">UK</div>
+          <div class="scale-pill" data-scale="india">India</div>
+        </div>
+        <div class="size-grid" id="ringGrid"></div>
+        <span class="helper-link" onclick="document.getElementById('chartPanel').scrollIntoView({behavior:'smooth'})">Not sure? See the full conversion chart above</span>
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Bracelet size <span class="req-star">*</span></div>
+        <div class="size-grid" id="braceletGrid"></div>
+      </div>
+
+      <div class="checkout-footer">
+        <span class="status-msg" id="statusMsg">Select both sizes to continue</span>
+        <button class="cta-btn" id="ctaBtn">Continue to checkout</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ringData = [
+  {us:'4', uk:'H', india:'8', mm:'14.9 mm'},
+  {us:'4.5', uk:'I 1/2', india:'9', mm:'15.3 mm'},
+  {us:'5', uk:'J 1/2', india:'10', mm:'15.7 mm'},
+  {us:'5.5', uk:'K 1/2', india:'11', mm:'16.1 mm'},
+  {us:'6', uk:'L 1/2', india:'12', mm:'16.5 mm'},
+  {us:'6.5', uk:'M 1/2', india:'13', mm:'16.9 mm'},
+  {us:'7', uk:'N 1/2', india:'14', mm:'17.3 mm'},
+  {us:'7.5', uk:'O 1/2', india:'15', mm:'17.7 mm'},
+  {us:'8', uk:'P 1/2', india:'16', mm:'18.2 mm'},
+  {us:'8.5', uk:'Q 1/2', india:'17', mm:'18.6 mm'},
+  {us:'9', uk:'R 1/2', india:'18', mm:'19.0 mm'},
+  {us:'9.5', uk:'S 1/2', india:'19', mm:'19.4 mm'},
+  {us:'10', uk:'T 1/2', india:'20', mm:'19.8 mm'}
+];
+
+const braceletData = [
+  {label:'XS', us:'6"', cm:'15.2 cm', india:'Petite'},
+  {label:'S', us:'6.5"', cm:'16.5 cm', india:'Small'},
+  {label:'M', us:'7"', cm:'17.8 cm', india:'Regular'},
+  {label:'L', us:'7.5"', cm:'19.0 cm', india:'Large'},
+  {label:'XL', us:'8"', cm:'20.3 cm', india:'Extra large'}
+];
+
+const necklaceData = [
+  {style:'Choker', us:'14–16"', cm:'35–40 cm', india:'Gulu Band'},
+  {style:'Princess', us:'17–19"', cm:'43–48 cm', india:'Standard'},
+  {style:'Matinee', us:'20–24"', cm:'50–60 cm', india:'Long Mala (short)'},
+  {style:'Opera', us:'28–36"', cm:'70–90 cm', india:'Long Mala'}
+];
+
+const earringData = [
+  {style:'Stud', us:'Sits on lobe', cm:'0 cm drop', india:'Stud / Tops'},
+  {style:'Small drop', us:'Up to 1"', cm:'Up to 2.5 cm', india:'Chhotе jhumka'},
+  {style:'Medium drop', us:'1–2"', cm:'2.5–5 cm', india:'Standard jhumka'},
+  {style:'Statement / chandelier', us:'2"+', cm:'5 cm+', india:'Bada jhumka'}
+];
+
+const broochData = [
+  {style:'Small', us:'Up to 1.5"', cm:'Up to 4 cm', india:'Chhota brooch'},
+  {style:'Medium', us:'1.5–2.5"', cm:'4–6 cm', india:'Standard brooch'},
+  {style:'Large / statement', us:'2.5"+', cm:'6 cm+', india:'Bada brooch'}
+];
+
+const panels = {
+  ring: {
+    title: 'Ring size conversion',
+    hint: 'US, UK and India scales side by side — find your size on whichever you already know.',
+    cols: ['US', 'UK', 'India', 'Diameter'],
+    rows: ringData.map(r => [r.us, r.uk, r.india, r.mm]),
+    note: '<b>Don\'t know your size?</b> Wrap a strip of paper around the base of your finger, mark where it overlaps, and measure the length in millimetres — that\'s your circumference. Or measure the inner diameter of a ring that already fits well.'
+  },
+  bracelet: {
+    title: 'Bracelet size conversion',
+    hint: 'Measured as wrist circumference, with a little room for comfort.',
+    cols: ['Size', 'Inches', 'Centimetres', 'Fit'],
+    rows: braceletData.map(r => [r.label, r.us, r.cm, r.india]),
+    note: '<b>Don\'t know your size?</b> Wrap a measuring tape (or a strip of paper) around your wrist where you\'d normally wear a bracelet, then add about half an inch for comfortable movement.'
+  },
+  necklace: {
+    title: 'Necklace length guide',
+    hint: 'How the length sits, from close to the neck to a longer drop.',
+    cols: ['Style', 'Inches', 'Centimetres', 'Also known as'],
+    rows: necklaceData.map(r => [r.style, r.us, r.cm, r.india]),
+    note: '<b>Tip:</b> measure a necklace you already own and love the length of, end to end, to find your usual fit.'
+  },
+  earring: {
+    title: 'Earring drop length guide',
+    hint: 'How far the earring hangs below the earlobe.',
+    cols: ['Style', 'Length', 'Centimetres', 'Also known as'],
+    rows: earringData.map(r => [r.style, r.us, r.cm, r.india]),
+    note: '<b>Tip:</b> studs sit flush with no drop — everything else is measured from where it meets the ear to its lowest point.'
+  },
+  brooch: {
+    title: 'Brooch size guide',
+    hint: 'Overall size, measured at the widest point.',
+    cols: ['Style', 'Size', 'Centimetres', 'Also known as'],
+    rows: broochData.map(r => [r.style, r.us, r.cm, r.india]),
+    note: '<b>Tip:</b> consider what the brooch is pinned to — a delicate shawl suits a smaller size, a structured coat lapel can carry a larger one.'
+  }
+};
+
+function renderPanel(type){
+  const p = panels[type];
+  let rowsHtml = p.rows.map((r,i) => `<tr>${r.map((c,ci)=>`<td${ci===0?' class="us"':''}>${c}</td>`).join('')}</tr>`).join('');
+  document.getElementById('chartPanel').innerHTML = `
+    <p class="panel-title">${p.title}</p>
+    <p class="panel-hint">${p.hint}</p>
+    <table>
+      <thead><tr>${p.cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="measure-note">${p.note}</div>
+  `;
+}
+
+document.querySelectorAll('.type-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPanel(btn.dataset.type);
+  });
+});
+renderPanel('ring');
+
+let ringScale = 'us';
+let selectedRing = null;
+let selectedBracelet = null;
+
+function renderRingGrid(){
+  const grid = document.getElementById('ringGrid');
+  grid.innerHTML = ringData.map(r => {
+    const val = r[ringScale];
+    const isSel = selectedRing === r.us;
+    return `<div class="size-chip${isSel?' selected':''}" data-us="${r.us}">${val}</div>`;
+  }).join('');
+  grid.querySelectorAll('.size-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      selectedRing = chip.dataset.us;
+      renderRingGrid();
+      updateStatus();
+    });
+  });
+}
+
+document.querySelectorAll('#ringScaleToggle .scale-pill').forEach(pill=>{
+  pill.addEventListener('click', ()=>{
+    document.querySelectorAll('#ringScaleToggle .scale-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    ringScale = pill.dataset.scale;
+    renderRingGrid();
+  });
+});
+
+function renderBraceletGrid(){
+  const grid = document.getElementById('braceletGrid');
+  grid.innerHTML = braceletData.map(b => {
+    const isSel = selectedBracelet === b.label;
+    return `<div class="size-chip${isSel?' selected':''}" data-label="${b.label}">${b.label}</div>`;
+  }).join('');
+  grid.querySelectorAll('.size-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      selectedBracelet = chip.dataset.label;
+      renderBraceletGrid();
+      updateStatus();
+    });
+  });
+}
+
+function updateStatus(){
+  const msg = document.getElementById('statusMsg');
+  const btn = document.getElementById('ctaBtn');
+  if(selectedRing && selectedBracelet){
+    msg.textContent = 'Sizes confirmed';
+    msg.classList.add('ok');
+    btn.classList.add('enabled');
+  } else {
+    msg.textContent = 'Select both sizes to continue';
+    msg.classList.remove('ok');
+    btn.classList.remove('enabled');
+  }
+}
+
+renderRingGrid();
+renderBraceletGrid();
+</script>
+</body>
+</html>

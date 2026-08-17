@@ -13,6 +13,7 @@ import productRoutes from "./routes/products";
 import analyticsRoutes from "./routes/analytics";
 import uploadRoutes from "./routes/uploads";
 import exchangeRatesRoutes from "./routes/exchange-rates";
+import chatRoutes from "./routes/chat";
 import { logError } from "./validation";
 import path from "path";
 
@@ -29,21 +30,39 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 const productionOrigins = [
   "https://aurorajewelstudio.com",
   "https://www.aurorajewelstudio.com",
+  "https://aurora-jewel-frontend.vercel.app",
 ];
 const configuredOrigins = (process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 const allowedOrigins = new Set(
-  process.env.NODE_ENV === "production"
-    ? productionOrigins
-    : [...productionOrigins, "http://localhost:3000", "http://127.0.0.1:3000", ...configuredOrigins]
+  [...productionOrigins, "http://localhost:3000", "http://127.0.0.1:3000", ...configuredOrigins]
 );
+
+function isOriginAllowed(origin: string): boolean {
+  if (allowedOrigins.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (
+      url.protocol === "https:" &&
+      (url.hostname === "aurorajewelstudio.com" ||
+        url.hostname.endsWith(".aurorajewelstudio.com") ||
+        url.hostname === "aurora-jewel-frontend.vercel.app" ||
+        url.hostname.endsWith(".vercel.app"))
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+      if (!origin || isOriginAllowed(origin)) return callback(null, true);
       const error = new Error("Origin is not allowed.");
       error.name = "CorsError";
       callback(error);
@@ -51,23 +70,6 @@ app.use(
     credentials: true,
   })
 );
-
-app.post(
-  "/api/payments/stripe/webhook",
-  express.raw({ type: "application/json" }),
-  handleStripeWebhook
-);
-app.use(express.json({ limit: "2mb", strict: true }));
-
-if (process.env.NODE_ENV !== "production") {
-  app.use((req, res, next) => {
-    const startedAt = performance.now();
-    res.on("finish", () => {
-      console.log(`${req.method} ${req.path} ${res.statusCode} ${Math.round(performance.now() - startedAt)}ms`);
-    });
-    next();
-  });
-}
 
 const limiter = (windowMs: number, limit: number) =>
   rateLimit({
@@ -88,7 +90,26 @@ const authLimiter = limiter(15 * 60 * 1000, 5);
 const formLimiter = limiter(15 * 60 * 1000, 10);
 const orderLimiter = limiter(15 * 60 * 1000, 20);
 const paymentLimiter = limiter(15 * 60 * 1000, 30);
+const chatLimiter = limiter(60 * 1000, 12);
 const searchLimiter = limiter(60 * 1000, 60);
+
+app.post(
+  "/api/payments/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
+app.use("/api/chat", chatLimiter, express.json({ limit: "32kb", strict: true }));
+app.use(express.json({ limit: "2mb", strict: true }));
+
+if (process.env.NODE_ENV !== "production") {
+  app.use((req, res, next) => {
+    const startedAt = performance.now();
+    res.on("finish", () => {
+      console.log(`${req.method} ${req.path} ${res.statusCode} ${Math.round(performance.now() - startedAt)}ms`);
+    });
+    next();
+  });
+}
 
 // --- Routes ---
 app.use("/api/admin/login", authLimiter);
@@ -105,6 +126,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/exchange-rates", exchangeRatesRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Serve static files from the public directory
 app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
