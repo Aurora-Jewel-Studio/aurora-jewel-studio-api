@@ -123,11 +123,26 @@ router.post("/", validate("body", schemas.chat), async (req, res) => {
       ),
     ].join("\n\n");
 
-    const reply = await callChatModel([
-      { role: "system", content: `${SYSTEM_INSTRUCTION}\n\n${modelContext}` },
-      ...body.history,
-      { role: "user", content: body.message },
-    ]);
+    let reply = "";
+    try {
+      reply = await callChatModel([
+        { role: "system", content: `${SYSTEM_INSTRUCTION}\n\n${modelContext}` },
+        ...body.history,
+        { role: "user", content: body.message },
+      ]);
+    } catch (modelError) {
+      logError("Model generation fallback", modelError);
+      if (products.length > 0) {
+        reply = `I found ${products.length} verified Aurora ${products.length === 1 ? "piece" : "pieces"} matching your request. Choose one below to view details.`;
+      } else if (knowledge.length > 0) {
+        const top = knowledge[0];
+        const firstSentence = top.content.split(/\n|\.\s+/)[0]?.trim() || "";
+        reply = firstSentence.endsWith(".") ? firstSentence : `${firstSentence}.`;
+      } else {
+        reply = "I don’t have enough verified information to answer that question. You can explore our collection below or contact the studio.";
+      }
+    }
+
     const guardedReply = guardModelReply(reply, {
       allowedPriceLabels: [
         body.message,
@@ -145,13 +160,10 @@ router.post("/", validate("body", schemas.chat), async (req, res) => {
     res.json({ success: true, reply: safeReply, products: publicProducts });
   } catch (error) {
     logError("Chat request failed", error);
-    res.status(503).json({
+    res.status(500).json({
       success: false,
-      error: "Chat model unavailable.",
-      message:
-        process.env.NODE_ENV === "production"
-          ? "Gemini and the configured chat fallback are unavailable."
-          : "Check GEMINI_API_KEY, or start Ollama and verify CHAT_MODEL and OLLAMA_BASE_URL.",
+      error: "Chat service error.",
+      message: "Please try again shortly.",
     });
   }
 });
