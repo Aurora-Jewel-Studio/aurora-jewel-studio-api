@@ -162,6 +162,7 @@ export const schemas = {
         .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), "Invalid page URL"),
       productId: z.union([z.number().int().positive(), slug]).optional(),
       refinement: z.literal("lower_price").optional(),
+      seenProducts: z.array(slug).max(50).optional(),
     })
     .strict(),
   stripeCheckout: orderIdBody,

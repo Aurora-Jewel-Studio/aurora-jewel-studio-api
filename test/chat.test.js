@@ -186,3 +186,69 @@ test("sizing guidance is deterministic and never exposes the source HTML path", 
   assert.doesNotMatch(response.reply, /\.html/i);
   assert.match(deterministicResponse("What necklace length should I choose?", "USD").reply, /17–19 inches/);
 });
+
+test("chat schema accepts seenProducts array for recommendation de-biasing", () => {
+  assert.equal(
+    schemas.chat.safeParse({
+      ...validRequest,
+      seenProducts: ["victorian-reverie", "blush-bloom"],
+    }).success,
+    true,
+  );
+});
+
+test("lexicalScore weights distinctive keywords higher than generic silver/jewelry terms", () => {
+  const specificScore = lexicalScore("vintage", "Victorian Reverie vintage antique silver piece", "Victorian Reverie");
+  const genericScore = lexicalScore("silver", "Victorian Reverie vintage antique silver piece", "Victorian Reverie");
+  assert.ok(specificScore > genericScore, "Specific search term should score higher than generic silver");
+});
+
+test("color stone queries exhibit shopping intent and map to gemstones", () => {
+  const { COLOR_GEMSTONES } = require("../dist/chat/products");
+  
+  // Test shopping intent for color-based queries
+  assert.equal(hasShoppingIntent("Show me a yellow stone ring"), true);
+  assert.equal(hasShoppingIntent("I want something with a red stone"), true);
+  assert.equal(hasShoppingIntent("Show me a purple gem"), true);
+  assert.equal(hasShoppingIntent("Do you have a green stone bracelet"), true);
+  assert.equal(hasShoppingIntent("lower budget"), true);
+  assert.equal(hasShoppingIntent("cheaper ruby"), true);
+
+  // Test color gemstone mappings
+  const yellow = COLOR_GEMSTONES.find((c) => c.pattern.test("yellow stone"));
+  assert.ok(yellow);
+  assert.ok(yellow.gemstones.includes("citrine"));
+
+  const red = COLOR_GEMSTONES.find((c) => c.pattern.test("red stone"));
+  assert.ok(red);
+  assert.ok(red.gemstones.includes("ruby"));
+
+  const purple = COLOR_GEMSTONES.find((c) => c.pattern.test("purple gem"));
+  assert.ok(purple);
+  assert.ok(purple.gemstones.includes("amethyst"));
+
+  const green = COLOR_GEMSTONES.find((c) => c.pattern.test("green jewel"));
+  assert.ok(green);
+  assert.ok(green.gemstones.includes("emerald"));
+
+  const pink = COLOR_GEMSTONES.find((c) => c.pattern.test("pink stone"));
+  assert.ok(pink);
+  assert.ok(pink.gemstones.includes("rose quartz"));
+
+  const blue = COLOR_GEMSTONES.find((c) => c.pattern.test("blue stone"));
+  assert.ok(blue);
+  assert.ok(blue.gemstones.includes("sapphire"));
+});
+
+test("lexicalScore matches color terms through expanded gemstone synonyms", () => {
+  const citrineScore = lexicalScore("yellow stone", "Citrine gemstone in sunset gold silver ring");
+  assert.ok(citrineScore > 0, "Yellow stone query should score citrine product");
+
+  const rubyScore = lexicalScore("red stone", "Ruby gemstone in velvet crimson silver ring");
+  assert.ok(rubyScore > 0, "Red stone query should score ruby product");
+
+  const emeraldScore = lexicalScore("green stone", "Emerald cut verdant green stone in silver");
+  assert.ok(emeraldScore > 0, "Green stone query should score emerald product");
+});
+
+

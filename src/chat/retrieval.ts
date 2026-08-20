@@ -27,17 +27,61 @@ const STOP_WORDS = new Set(
 );
 
 const SYNONYMS: Record<string, string[]> = {
+  affordable: ["lower budget", "budget", "cheaper", "accessible", "under", "inexpensive"],
   allergy: ["allergic", "nickel", "hypoallergenic", "sensitive"],
   allergic: ["allergy", "nickel", "hypoallergenic", "sensitive"],
+  amethyst: ["purple", "violet", "lavender", "prasiolite"],
+  anniversary: ["wedding", "gift", "romantic", "milestone", "celebration"],
+  black: ["onyx", "dark", "noir"],
+  blue: ["sapphire", "kyanite", "topaz", "tanzanite", "azure", "oceanic"],
+  cheap: ["lower budget", "budget", "affordable", "cheaper", "accessible", "low price", "lowest"],
+  citrine: ["yellow", "golden", "amber", "sunshine", "topaz"],
   clean: ["care", "cleaning", "polish", "tarnish"],
   delivery: ["shipping", "ship", "dispatch"],
-  gift: ["gifting", "birthday", "anniversary", "recipient"],
+  elegant: ["delicate", "refined", "sophisticated", "graceful", "classic", "minimalist"],
+  emerald: ["green", "verde", "verdant", "beryl"],
+  garnet: ["red", "crimson", "scarlet"],
+  gift: ["gifting", "birthday", "anniversary", "recipient", "present"],
+  green: ["emerald", "peridot", "onyx", "spinel", "verde", "verdant", "olive"],
+  onyx: ["black", "green onyx", "dark"],
+  pearl: ["white", "cream", "classic", "nacre"],
+  peridot: ["green", "olive", "lime"],
+  pink: ["rose quartz", "quartz", "tourmaline", "blush", "rose"],
+  popular: ["bestseller", "favorite", "trending", "signature", "loved", "top"],
+  purple: ["amethyst", "tanzanite", "violet", "lilac", "lavender"],
+  quartz: ["rose quartz", "gemstone", "pink", "crystal"],
+  red: ["ruby", "garnet", "crimson", "scarlet", "spinel"],
   refund: ["return", "exchange", "damaged"],
   return: ["refund", "exchange", "damaged"],
+  ruby: ["red", "crimson", "scarlet", "passion", "corundum"],
+  sapphire: ["blue", "kyanite", "royal blue", "corundum"],
   ship: ["shipping", "delivery", "international"],
   size: ["sizing", "fit", "measure", "diameter"],
-  wedding: ["bridal", "engagement", "occasion"],
+  statement: ["bold", "striking", "dramatic", "chandelier", "standout", "eye-catching"],
+  tanzanite: ["blue", "violet", "purple"],
+  topaz: ["blue", "sky blue", "yellow", "citrine"],
+  tourmaline: ["pink", "blush", "rose"],
+  vintage: ["retro", "antique", "heritage", "classic", "victorian", "traditional", "artisan", "filigree", "timeless"],
+  wedding: ["bridal", "engagement", "occasion", "anniversary"],
+  white: ["pearl", "moissanite", "cz", "cubic zirconia", "clear", "diamond"],
+  yellow: ["citrine", "topaz", "amber", "golden", "gold", "warm", "sunset"],
 };
+
+const GENERIC_TERMS = new Set([
+  "silver",
+  "sterling",
+  "handcrafted",
+  "nepal",
+  "piece",
+  "jewel",
+  "jewelry",
+  "jewellery",
+  "aurora",
+  "collection",
+  "design",
+  "genuine",
+  "925",
+]);
 
 function stem(token: string) {
   if (token.length > 5 && token.endsWith("ing")) return token.slice(0, -3);
@@ -158,10 +202,14 @@ export function lexicalScore(query: string, content: string, heading = "") {
   const counts = new Map<string, number>();
   for (const term of contentTerms) counts.set(term, (counts.get(term) || 0) + 1);
 
-  return queryTerms.reduce(
-    (score, term) => score + (headingTerms.has(term) ? 4 : 0) + Math.min(counts.get(term) || 0, 3),
-    0,
-  );
+  return queryTerms.reduce((score, term) => {
+    const isGeneric = GENERIC_TERMS.has(term);
+    const weight = isGeneric ? 0.35 : 1.5;
+    const headingBoost = headingTerms.has(term) ? (isGeneric ? 2 : 6) : 0;
+    const termCount = counts.get(term) || 0;
+    const contentBoost = Math.min(termCount, 3) * weight;
+    return score + headingBoost + contentBoost;
+  }, 0);
 }
 
 export function retrieveKnowledge(query: string, limit = 5): KnowledgeChunk[] {
