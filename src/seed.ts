@@ -568,7 +568,7 @@ const PRODUCTS: ProductSeed[] = [
     images: productImagesWebp("drops", "arc-regal"),
     weight: 4.9,
     features: {
-      Stone: "Green Onyx, Moissannite",
+      Stone: "Green Onyx, Moissanite",
       "Stone Type": "Lab Grown Stone",
       Color: "Green",
       "Stone CT": "2.31 CT",
@@ -1013,10 +1013,7 @@ const PRODUCTS: ProductSeed[] = [
     images: productImagesWebp("sparkles", "luna-drops"),
     weight: 3.25,
     features: {
-      Stone: "ADD HERE",
-      "Stone Type": "Lab Grown Stone",
       Color: "Silver",
-      "Stone CT": "ADD HERE",
     },
     options: [MATERIAL_OPTION],
     variants: silverPanchadhatuVariants("LUN-DRP", 23.06),
@@ -1550,16 +1547,17 @@ const PRODUCTS: ProductSeed[] = [
   {
     handle: "verdant-horizon",
     title: "Verdant Horizon",
-    description: "ADD HERE",
-    category_handle: "sparkles",
+    description:
+      "Three oval-cut green emerald stones form a polished sterling silver ring, balancing a luminous center with deeper green side stones.",
+    category_handle: "essence",
     thumbnail: img("sparkles", "verdant-horizon", "main.webp"),
     images: productImagesWebp("sparkles", "verdant-horizon"),
     weight: 0,
     features: {
-      Stone: "ADD HERE",
+      Stone: "Emerald",
       "Stone Type": "Lab Grown Stone",
-      Color: "ADD HERE",
-      "Stone CT": "ADD HERE",
+      Color: "Green",
+      "Stone CT": "3.00 CT",
     },
     options: [MATERIAL_OPTION],
     variants: silverPanchadhatuVariants("VRD-HRZ", 50.0),
@@ -1584,11 +1582,8 @@ async function seed() {
 
   try {
     await client.query("BEGIN");
-    console.log("🗑️  Clearing existing products...");
-    await client.query("DELETE FROM products");
-
     // ── Products ──────────────────────────────────────────────────────────
-    console.log("📦 Seeding products...\n");
+    console.log("📦 Syncing products...\n");
 
   for (const p of PRODUCTS) {
     const silverVariant =
@@ -1598,8 +1593,20 @@ async function seed() {
 
     await client.query(
       `INSERT INTO products
-         (handle, title, description, price, currency, thumbnail, images, options, variants, category_handle, weight, features)
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11, $12::jsonb)`,
+       (handle, title, description, price, currency, thumbnail, images, options, variants, category_handle, weight, features)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9::jsonb, $10, $11, $12::jsonb)
+       ON CONFLICT (handle) DO UPDATE SET
+         title = EXCLUDED.title,
+         description = EXCLUDED.description,
+         price = EXCLUDED.price,
+         currency = EXCLUDED.currency,
+         thumbnail = EXCLUDED.thumbnail,
+         images = EXCLUDED.images,
+         options = EXCLUDED.options,
+         variants = EXCLUDED.variants,
+         category_handle = EXCLUDED.category_handle,
+         weight = EXCLUDED.weight,
+         features = EXCLUDED.features`,
       [
         p.handle,
         p.title,

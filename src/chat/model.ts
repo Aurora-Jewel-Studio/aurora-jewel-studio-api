@@ -4,9 +4,13 @@ type ChatMessage = {
 };
 
 async function callGemini(messages: ChatMessage[], apiKey: string) {
-  const models = process.env.GEMINI_MODEL
-    ? [process.env.GEMINI_MODEL]
-    : ["gemini-3.5-flash", "gemini-3.7-flash", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"];
+  const configuredModels = [process.env.GEMINI_MODEL, ...(process.env.GEMINI_FALLBACK_MODELS || "").split(",")]
+    .map((model) => model?.trim())
+    .filter((model): model is string => Boolean(model));
+  const models = configuredModels.length
+    ? [...new Set(configuredModels)]
+    : ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"];
+  const signal = AbortSignal.timeout(12_000);
 
   const systemInstruction = messages
     .filter(({ role }) => role === "system")
@@ -22,6 +26,13 @@ async function callGemini(messages: ChatMessage[], apiKey: string) {
   let lastError: Error | null = null;
   for (const model of models) {
     try {
+      const thinkingConfig = /^gemini-3\.7/i.test(model)
+        ? { thinkingLevel: "low" }
+        : /^gemini-3\.(?:6|5)/i.test(model)
+          ? { thinkingLevel: "minimal" }
+          : /^gemini-2\.5-flash/i.test(model)
+            ? { thinkingBudget: 0 }
+            : undefined;
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
         {
@@ -30,8 +41,9 @@ async function callGemini(messages: ChatMessage[], apiKey: string) {
           body: JSON.stringify({
             ...(systemInstruction && { system_instruction: { parts: [{ text: systemInstruction }] } }),
             contents,
+            generationConfig: { temperature: 0.2, maxOutputTokens: 512, ...(thinkingConfig && { thinkingConfig }) },
           }),
-          signal: AbortSignal.timeout(30_000),
+          signal,
         },
       );
 
@@ -40,9 +52,14 @@ async function callGemini(messages: ChatMessage[], apiKey: string) {
         continue;
       }
       const data = (await response.json()) as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: unknown }> } }>;
+        candidates?: Array<{ finishReason?: string; content?: { parts?: Array<{ text?: unknown }> } }>;
       };
-      const content = data.candidates?.[0]?.content?.parts
+      const candidate = data.candidates?.[0];
+      if (candidate?.finishReason === "MAX_TOKENS") {
+        lastError = new Error(`Gemini ${model} exhausted its output budget.`);
+        continue;
+      }
+      const content = candidate?.content?.parts
         ?.flatMap((part) => (typeof part.text === "string" ? [part.text] : []))
         .join("")
         .trim();
@@ -77,9 +94,14 @@ async function callOllama(messages: ChatMessage[]) {
 
   const response = await fetch(new URL("/api/chat", baseUrl), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(process.env.OLLAMA_API_KEY?.trim() && {
+        Authorization: `Bearer ${process.env.OLLAMA_API_KEY.trim()}`,
+      }),
+    },
     body: JSON.stringify({ model, messages, stream: false, options: { temperature: 0.2 } }),
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(20_000),
   });
 
   if (!response.ok) throw new Error(`Ollama returned ${response.status}.`);

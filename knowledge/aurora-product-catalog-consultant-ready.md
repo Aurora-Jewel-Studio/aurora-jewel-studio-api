@@ -527,7 +527,7 @@ A purple cubic zirconia piece, in 925 sterling silver.
 - Currently the only piece in this exact color family — happy to suggest a different color if wanted.
 
 
-**Oceanic OmbrÃ©** · `AUR-SPK-070` · $68.08
+**Oceanic Ombré** · `AUR-SPK-070` · $68.08
 A blue, green green amethyst & sky blue topaz piece, in 925 sterling silver. *(Two-stone piece: green amethyst paired with sky blue topaz.)*
 - **Good for:** Teej (modern alternative to red), Everyday / office wear, February birthstone gift
 - **Who it suits:** yourself for daily wear, or a colleague/friend

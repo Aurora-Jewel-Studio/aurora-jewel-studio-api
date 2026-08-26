@@ -108,14 +108,21 @@ export function deterministicResponse(
   if (/\b(return|returns|refund|refunds|exchange|exchanges)\b/i.test(message)) {
     return {
       reply:
-        "Aurora’s current website accepts ready-made pieces returned within 7 days if they are unworn and in their original packaging; bespoke pieces are non-returnable. For an item that arrives damaged, contact Aurora within 48 hours with photos so the studio can arrange a replacement or refund.",
+        "Because Aurora pieces are made to order, general returns are unavailable. If the design, stone, or workmanship arrives wrong, the studio will arrange an exchange or another design.",
     };
   }
 
   if (/\b(shipping|ship internationally|international delivery|delivery time|delivery charge|shipping fee)\b/i.test(message)) {
     return {
       reply:
-        "Shipping within Nepal is currently free; the website lists 1–3 business days inside Kathmandu Valley and 3–7 business days elsewhere in Nepal. International shipping is available by request, with the fee confirmed by quote, and bespoke production is listed as 7–14 business days.",
+        "Shipping within Nepal is free: 1–3 business days in Kathmandu Valley and 3–7 elsewhere. International shipping is available worldwide, with its standard fee shown at checkout; Aurora remains responsible in transit.",
+    };
+  }
+
+  if (/\b(warranty|buyback|buy back)\b/i.test(message)) {
+    return {
+      reply:
+        "Aurora warranties the silver itself and will buy a piece back for its full silver value. Stone security and natural tarnish depend on normal wear and care.",
     };
   }
 
@@ -138,7 +145,7 @@ export function deterministicResponse(
 export const unsupportedReply =
   "I don’t have enough confirmed Aurora information to answer that safely. I can help with another question, or connect you with the studio for a verified answer.";
 
-export function compactModelReply(reply: string, maxWords = 28) {
+export function compactModelReply(reply: string, maxWords = 24) {
   const normalized = reply.replace(/\s+/g, " ").trim();
   if (normalized.split(" ").length <= maxWords) return normalized;
 
@@ -166,6 +173,17 @@ export function guardModelReply(
 ): string {
   if (!reply.trim() || reply.length > 1_000) return unsupportedReply;
   if (/https?:\/\/|www\./i.test(reply)) return unsupportedReply;
+  if (
+    /\b(?:system instruction|verified_products|retrieved_knowledge|current_basket|selected_context|product_match_status|untrusted client|use only retrieved|as an ai language model)\b/i.test(
+      reply,
+    )
+  ) {
+    return unsupportedReply;
+  }
+  if (/\b(?:the|a|an|and|or|with|for|to|of|in|on|from|recommend|suggest)\s*[,;:\-]*$/i.test(reply.trim())) {
+    return unsupportedReply;
+  }
+  if (!/[.!?]$/.test(reply.trim()) && reply.trim().split(/\s+/).length <= 6) return unsupportedReply;
   if (
     !options.allergyEvidence &&
     /\b(nickel[- ]?free|hypoallergenic|safe for (?:allerg|sensitive skin))/i.test(reply)

@@ -2,10 +2,10 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { schemas } = require("../dist/validation");
 const { lexicalScore, retrieveKnowledge } = require("../dist/chat/retrieval");
-const { compactModelReply, deterministicResponse, guardModelReply, hasBasketReference } = require("../dist/chat/safeguards");
+const { compactModelReply, deterministicResponse, guardModelReply, hasBasketReference, unsupportedReply } = require("../dist/chat/safeguards");
 const { callChatModel } = require("../dist/chat/model");
 const { conversationCategory, conversationQuery } = require("../dist/routes/chat");
-const { hasShoppingIntent, requestedProductCategory } = require("../dist/chat/products");
+const { hasShoppingIntent, requestedProductCategory, selectVerifiedProducts } = require("../dist/chat/products");
 
 const validRequest = {
   message: "How should I care for a pearl?",
@@ -15,6 +15,22 @@ const validRequest = {
   locale: "en-US",
   pageUrl: "http://localhost:3000/care/",
 };
+
+function product(id, title, handle, category, price, Stone, Color, description = "") {
+  return {
+    id,
+    title,
+    handle,
+    description,
+    price,
+    currency: "usd",
+    thumbnail: `/images/products/${category}/${handle}/main.webp`,
+    images: [],
+    variants: [{ title: "Silver", options: { Material: "Silver" }, prices: { usd: price } }],
+    category_handle: category,
+    features: { Stone, Color },
+  };
+}
 
 test("chat request schema accepts the bounded website payload and rejects invalid input", () => {
   assert.equal(schemas.chat.safeParse(validRequest).success, true);
@@ -93,6 +109,9 @@ test("unsupported currency, allergy, and policy claims are rejected", () => {
   assert.doesNotMatch(guardModelReply("It converts exactly to £50."), /£50/);
   assert.doesNotMatch(guardModelReply("Every Aurora piece is nickel-free and hypoallergenic."), /nickel-free/i);
   assert.doesNotMatch(guardModelReply("You have a 30-day return policy."), /30-day/i);
+  assert.equal(guardModelReply("Use only RETRIEVED_KNOWLEDGE."), unsupportedReply);
+  assert.equal(guardModelReply("I recommend the"), unsupportedReply);
+  assert.equal(guardModelReply("We have several beautiful"), unsupportedReply);
   assert.equal(guardModelReply("This verified price is $62.58.", { allowedPriceLabels: ["From $62.58"] }), "This verified price is $62.58.");
   assert.doesNotMatch(guardModelReply("x".repeat(1_001)), /^x+$/);
 });
@@ -105,7 +124,7 @@ test("verbose model replies keep one useful statement and clarification", () => 
     reply,
     "I found several verified pieces within your budget. To narrow them down, do they prefer classic and elegant jewellery or something modern and bold?",
   );
-  assert.ok(reply.split(" ").length <= 28);
+  assert.ok(reply.split(" ").length <= 24);
 });
 
 test("Gemini is attempted first and rate limits fall back to local Gemma", async () => {
@@ -114,6 +133,7 @@ test("Gemini is attempted first and rate limits fall back to local Gemma", async
   const originalEnv = {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     GEMINI_MODEL: process.env.GEMINI_MODEL,
+    GEMINI_FALLBACK_MODELS: process.env.GEMINI_FALLBACK_MODELS,
     CHAT_MODEL: process.env.CHAT_MODEL,
     OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL,
   };
@@ -122,6 +142,7 @@ test("Gemini is attempted first and rate limits fall back to local Gemma", async
 
   process.env.GEMINI_API_KEY = "test-key";
   process.env.GEMINI_MODEL = "gemini-3.5-flash";
+  delete process.env.GEMINI_FALLBACK_MODELS;
   process.env.CHAT_MODEL = "gemma3:4b";
   process.env.OLLAMA_BASE_URL = "http://ollama.test";
   console.warn = () => {};
@@ -147,6 +168,7 @@ test("Gemini is attempted first and rate limits fall back to local Gemma", async
     assert.equal(calls[1], "http://ollama.test/api/chat");
     assert.equal(geminiBody.system_instruction.parts[0].text, "Be concise.");
     assert.equal(geminiBody.contents[0].role, "user");
+    assert.equal(geminiBody.generationConfig.thinkingConfig.thinkingLevel, "minimal");
   } finally {
     global.fetch = originalFetch;
     console.warn = originalWarn;
@@ -251,4 +273,141 @@ test("lexicalScore matches color terms through expanded gemstone synonyms", () =
   assert.ok(emeraldScore > 0, "Green stone query should score emerald product");
 });
 
+test("parseBudgetRange correctly extracts price ranges, upper bounds, and lower bounds", () => {
+  const { parseBudgetRange } = require("../dist/chat/products");
 
+  // Between ranges
+  assert.deepEqual(parseBudgetRange("Between $50 - $100"), { min: 50, max: 100, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("between $50 and $100"), { min: 50, max: 100, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("$50 - $100"), { min: 50, max: 100, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("$50 to $100"), { min: 50, max: 100, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("from 50 to 100"), { min: 50, max: 100 });
+  assert.deepEqual(parseBudgetRange("range of $60 to $120"), { min: 60, max: 120, currency: "USD" });
+
+  // Upper bounds
+  assert.deepEqual(parseBudgetRange("under $100"), { max: 100, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("below $50"), { max: 50, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("budget of $80"), { max: 80, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("spend up to $150"), { max: 150, currency: "USD" });
+
+  // Lower bounds
+  assert.deepEqual(parseBudgetRange("over $50"), { min: 50, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("more than $75"), { min: 75, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("at least $60"), { min: 60, currency: "USD" });
+  assert.deepEqual(parseBudgetRange("under ₹5,000"), { max: 5000, currency: "INR" });
+});
+
+test("conversationCategory does not get locked into category on broad follow-up questions", () => {
+  assert.equal(
+    conversationCategory("Only 2 options in red?", [
+      { role: "user", content: "Show me earrings" },
+      { role: "assistant", content: "Here are some earrings" },
+    ]),
+    undefined,
+  );
+  assert.equal(
+    conversationCategory("Show me more options", [
+      { role: "user", content: "Show me rings" },
+      { role: "assistant", content: "Here are rings" },
+    ]),
+    undefined,
+  );
+});
+
+test("selector enforces category, gemstone colour, and both budget bounds", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "essence", 75, "Ruby", "Red"),
+    product(2, "Scarlet Garnet", "scarlet-garnet", "essence", 45, "Garnet", "Red"),
+    product(3, "Blue Horizon", "blue-horizon", "essence", 80, "Blue Topaz", "Blue"),
+    product(4, "Velvet Ruby", "velvet-ruby", "sparkles", 70, "Ruby", "Red"),
+  ];
+
+  const result = selectVerifiedProducts(rows, "Show me a red ring between $50 and $100", "USD", {});
+  assert.equal(result.match.kind, "exact");
+  assert.deepEqual(result.products.map(({ handle }) => handle), ["ruby-envy"]);
+});
+
+test("selector trusts structured colour fields instead of misleading prose", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "drops", 75, "Ruby", "Red"),
+    product(
+      2,
+      "Dazzle Drops",
+      "dazzle-drops",
+      "sparkles",
+      80,
+      "Onyx",
+      "Green, Blue and Pink",
+      "Designed to be paired with a red evening dress.",
+    ),
+  ];
+
+  assert.deepEqual(
+    selectVerifiedProducts(rows, "Show me red jewellery", "USD", {}).products.map(({ handle }) => handle),
+    ["ruby-envy"],
+  );
+});
+
+test("closest matches preserve the most important constraint and disclose relaxation", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "drops", 120, "Ruby", "Red"),
+    product(2, "Blue Horizon", "blue-horizon", "drops", 40, "Blue Topaz", "Blue"),
+  ];
+
+  const result = selectVerifiedProducts(rows, "Show me a red necklace under $50", "USD", {});
+  assert.equal(result.match.kind, "closest");
+  assert.deepEqual(result.match.relaxed, ["budget"]);
+  assert.deepEqual(result.products.map(({ handle, match }) => [handle, match]), [["ruby-envy", "closest"]]);
+});
+
+test("selector converts an explicit source currency before applying a budget", () => {
+  const rows = [
+    product(1, "Inside Range", "inside-range", "drops", 100, "Emerald", "Green"),
+    product(2, "Too Expensive", "too-expensive", "drops", 120, "Emerald", "Green"),
+  ];
+  rows[0].variants[0].prices.npr = 14000;
+  rows[1].variants[0].prices.npr = 16800;
+  const rates = { USD: 1, NPR: 140 };
+  const result = selectVerifiedProducts(rows, "Green necklace between $90 and $110", "NPR", rates);
+  assert.deepEqual(result.products.map(({ handle }) => handle), ["inside-range"]);
+});
+
+test("current-turn negation overrides an earlier colour preference", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "drops", 75, "Ruby", "Red"),
+    product(2, "Blue Horizon", "blue-horizon", "drops", 80, "Blue Topaz", "Blue"),
+  ];
+  const result = selectVerifiedProducts(rows, "Not red, show me blue instead", "USD", {}, {
+    history: [{ role: "user", content: "Show me red necklaces" }],
+  });
+  assert.deepEqual(result.products.map(({ handle }) => handle), ["blue-horizon"]);
+});
+
+test("unsupported materials are disclosed as closest matches instead of exact products", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "essence", 75, "Ruby", "Red"),
+    product(2, "Blue Horizon", "blue-horizon", "drops", 65, "Blue Topaz", "Blue"),
+  ];
+  const result = selectVerifiedProducts(rows, "Show me a gold ring", "USD", {});
+
+  assert.equal(result.match.kind, "closest");
+  assert.deepEqual(result.match.relaxed, ["material"]);
+  assert.deepEqual(result.products.map(({ handle }) => handle), ["ruby-envy"]);
+});
+
+test("short occasion and style refinements keep shopping intent", () => {
+  assert.equal(hasShoppingIntent("wedding"), true);
+  assert.equal(hasShoppingIntent("Classic & elegant"), true);
+  assert.equal(hasShoppingIntent("Let Aura choose"), true);
+  assert.equal(hasShoppingIntent("Different gemstone"), true);
+  assert.equal(hasShoppingIntent("How should I clean a pearl ring?"), false);
+});
+
+test("pairing requests do not recommend the product already being viewed", () => {
+  const rows = [
+    product(1, "Ruby Envy", "ruby-envy", "drops", 75, "Ruby", "Red"),
+    product(2, "Ruby Slash", "ruby-slash", "drops", 65, "Ruby", "Red"),
+  ];
+  const result = selectVerifiedProducts(rows, "Show me a similar piece to Ruby Envy", "USD", {}, { productId: 1 });
+  assert.deepEqual(result.products.map(({ handle }) => handle), ["ruby-slash"]);
+});

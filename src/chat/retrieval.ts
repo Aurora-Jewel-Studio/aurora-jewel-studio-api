@@ -102,13 +102,14 @@ function tokens(value: string) {
 }
 
 function cleanContent(content: string, product = false) {
-  let cleaned = content.replace(/OmbrÃ©/g, "Ombré").replace(/\s+/g, " ").trim();
+  let cleaned = content.replace(/OmbrÃ©/g, "Ombré");
   if (product) {
     cleaned = cleaned
+      .replace(/^\s*-\s+\*\*(?:Similar option|Want more presence\?|Lighter on the budget):\*\*.*$/gim, "")
       .replace(/\s*·\s*\$[\d,.]+/g, "")
       .replace(/\s*\(\$[\d,.]+\)/g, "");
   }
-  return cleaned;
+  return cleaned.replace(/\s+/g, " ").trim();
 }
 
 function splitMarkdown(source: string, category: KnowledgeChunk["category"], markdown: string) {

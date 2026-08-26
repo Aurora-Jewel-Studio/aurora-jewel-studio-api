@@ -13,7 +13,7 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
 - **Analytics Aggregator**: Generates summary statistics (total revenues, order counts, bespoke volume) for the admin dashboard.
 - **Multi-Currency rates**: Integrated caching exchange-rate utility converting USD catalogs to NPR and other currencies.
 - **JWT Authorization**: Protects sensitive catalog, analytics, and request tables from unauthorized access.
-- **Aura Chat**: Retrieves small, relevant knowledge chunks and verified catalog records before calling local Gemma through Ollama.
+- **Aura Chat**: Retrieves small, relevant knowledge chunks and verified catalog records before calling Gemini, with an optional Ollama-compatible Gemma fallback.
 
 ---
 
@@ -32,7 +32,7 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
 
 - `/src/index.ts`: Application entry point setting up middleware, routes, and local server configurations.
 - `/src/db.ts`: Serverless-safe connection pooling and idempotent schema initialization.
-- `/src/seed.ts`: Catalog seeding script containing sample luxury product details.
+- `/src/seed.ts`: Canonical catalog sync used by the API; the storefront JSON fallback mirrors these handles.
 - `/src/middleware/auth.ts`: JWT checks validating requests to admin-only API routes.
 - `/src/routes/`:
   - `admin-auth.ts`: Signs and checks admin credentials.
@@ -74,7 +74,7 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
    npm run db:init
    ```
 
-5. After removing every placeholder from the catalog, seed products if needed:
+5. Sync the canonical catalog. This safely upserts by product handle and does not clear the table:
    ```bash
    npm run seed
    ```
@@ -90,8 +90,8 @@ The custom backend API service for **Aurora Jewel Studio**, powering product man
    ollama pull gemma3:4b
    ollama serve
    ```
-   `POST /api/chat` uses `GEMINI_MODEL` first, then falls back to `CHAT_MODEL` through
-   `OLLAMA_BASE_URL` whenever Gemini is unavailable or limited. The knowledge snapshot in
+   `POST /api/chat` uses `GEMINI_MODEL`, then any comma-separated `GEMINI_FALLBACK_MODELS`,
+   before falling back to `CHAT_MODEL` through `OLLAMA_BASE_URL`. The knowledge snapshot in
    `knowledge/` is split and ranked locally; no knowledge files or model instructions
    are sent to the browser.
 
@@ -107,6 +107,7 @@ The backend compiles into serverless route blocks. Vercel maps files dynamically
 
 ### Chat production
 
-Set `GEMINI_API_KEY` and `GEMINI_MODEL` in Vercel. Gemini is the primary provider. Local
-Gemma remains the development fallback; Vercel cannot reach Ollama running on a developer
-Mac, so a Gemini outage in production returns the existing chat-unavailable response.
+Set `GEMINI_API_KEY`, `GEMINI_MODEL`, and `GEMINI_FALLBACK_MODELS` in Vercel. Gemini is the
+primary provider. For Gemma in production, configure a public HTTPS `OLLAMA_BASE_URL` and
+optional `OLLAMA_API_KEY`; localhost remains development-only. If every provider is down,
+the route still returns a concise catalog-grounded response instead of inventing facts.
