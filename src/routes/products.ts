@@ -54,7 +54,7 @@ router.get("/", validate("query", schemas.productList), async (_req, res) => {
     const resolvedPage = page || 1;
     const resolvedLimit = limit || 20;
     const countValues = [...values];
-    let sql = `SELECT * FROM products ${where} ORDER BY created_at DESC`;
+    let sql = `SELECT * FROM products ${where} ORDER BY created_at DESC, id DESC`;
 
     if (paginate) {
       values.push(resolvedLimit, (resolvedPage - 1) * resolvedLimit);
